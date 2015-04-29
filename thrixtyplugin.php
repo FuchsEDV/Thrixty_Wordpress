@@ -126,6 +126,23 @@
 						// insert stuff here
 
 
+
+
+
+						// basepath guessing
+						// check for old shortcode attribute path
+						if( isset($old_sc_atts["path"]) && $old_sc_atts["path"] != "" ){
+							// if it was set, set basepath to that old value
+							$new_shortcode .= "basepath='".$old_sc_atts["path"]."' ";
+						// if not, check for different old and new basepath options
+						} else if( isset($box3d_options["path"]) && isset($thrixty_options["basepath"]) && $box3d_options["path"] != $thrixty_options["basepath"] ){
+							// if they are indeed different, the new shortcode with the old path and object can only work with a basepath attribute
+							$new_shortcode .= "basepath='".$box3d_options["path"]."' ";
+						}
+
+
+
+
 						if( isset($old_sc_atts["object"]) && $old_sc_atts["object"] != "" ){
 							$new_shortcode .= "filelist_path_small='".$old_sc_atts["object"]."/small/Filelist.txt' ";
 							$new_shortcode .= "filelist_path_large='".$old_sc_atts["object"]."/large/Filelist.txt' ";
@@ -143,6 +160,9 @@
 				}
 
 				// assign new content to post
+				echo "<pre>";
+					var_dump($post_content);
+				echo "</pre>";
 				$post->post_content = $post_content;
 				wp_update_post($post);
 
