@@ -148,21 +148,21 @@ jQuery(document).ready(function(){
 								if( "" != current_elem.value ){
 									content += "basepath=\""+current_elem.value+"\" ";
 								} else if( "" == thrixty_sc_gen_var.basepath ){
-									content += "basepath=\"[BASEPATH]\" ";
+									content += "basepath=\"|BASEPATH|\" ";
 								}
 								break;
 							case "filelist_path_small":
 								if( "" != current_elem.value ){
 									content += "filelist_path_small=\""+current_elem.value+"\" ";
 								} else {
-									content += "filelist_path_small=\"[SMALL FILELIST]\" ";
+									content += "filelist_path_small=\"|SMALL FILELIST|\" ";
 								}
 								break;
 							case "filelist_path_large":
 								if( "" != current_elem.value ){
 									content += "filelist_path_large=\""+current_elem.value+"\" ";
 								} else {
-									content += "filelist_path_large=\"[LARGE FILELIST]\" ";
+									content += "filelist_path_large=\"|LARGE FILELIST|\" ";
 								}
 								break;
 							case "zoom_mode":

@@ -50,6 +50,12 @@
 
 
 
+
+
+
+
+
+
 	/* PLUGIN ADMIN PAGE */
 	add_action('admin_menu', 'thrixty_player_settings_site');
 	function thrixty_player_settings_site() {
@@ -57,6 +63,91 @@
 	}
 
 	function thrixty_options_page_html() {
+		$thrixty_options = get_option('thrixty_options');
+		$box3d_options = get_option("box3d_options");
+		// echo "<pre>";
+		// var_dump($thrixty_options);
+		// var_dump($box3d_options);
+		// echo "</pre>";
+		if( isset($_POST['site_ids']) ){
+			global $wpdb;
+
+			$post_ids_string = $_POST['site_ids'];
+			$post_arr = [];
+
+
+			$wp_query_args = array("s" => "[box3d");
+			if( $post_ids_string != "all" ){
+				$post_ids_arr = array();
+				$tmp_arr = explode(",", $post_ids_string);
+				foreach( $tmp_arr as $id ){
+					// $id = trim($id);
+					$id = preg_replace( "/[^0-9]/", "", $id );
+					if( "" != $id ){
+						$post_ids_arr []= $id;
+					}
+				} unset($tmp_arr, $id);
+
+				$wp_query_args["post__in"] = $post_ids_arr;
+			}
+
+
+
+			// this is the shortcode, that would be returned by "get_shortcode_regex()"; but this conversion is supposed to only trigger on box3d shortcodes!
+			$shortcode_regex = '/\[(\[?)(box3d)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*+(?:\[(?!\/\2\])[^\[]*+)*+)\[\/\2\])?)(\]?)/s';
+
+
+			// get all posts with this shortcode attribute
+			$the_query = new WP_Query( $wp_query_args );
+			$posts = $the_query->posts;
+
+			// each found post will get replaces
+			foreach( $posts as $post ){
+				// echo "<pre>";
+				// var_dump( $post->post_content );
+				// echo "</pre>";
+				// get inside text
+				$post_content = $post->post_content;
+
+				// get position and length of first find (TODO: erweitere zu schleife)
+				$hits = array();
+				preg_match_all($shortcode_regex, $post_content, $hits, PREG_OFFSET_CAPTURE); // found things will get stored in $hits
+				$hits = array_reverse($hits[0]);
+				foreach( $hits as $hit ){
+					// shortcode_parse_atts forgets the space before the closing bracket...
+					$old_shortcode = substr_replace( $hit[0], " ", -1, 0 );
+					$position = $hit[1];
+
+					// parse to array
+					$old_sc_atts = shortcode_parse_atts($old_shortcode);
+
+					// calculate thrixty shortcode
+					$new_shortcode = "[thrixty ";
+						// insert stuff here
+
+
+						if( isset($old_sc_atts["object"]) && $old_sc_atts["object"] != "" ){
+							$new_shortcode .= "filelist_path_small='".$old_sc_atts["object"]."/small/Filelist.txt' ";
+							$new_shortcode .= "filelist_path_large='".$old_sc_atts["object"]."/large/Filelist.txt' ";
+						}
+						if( isset($old_sc_atts["direction"]) && $old_sc_atts["direction"] != "" ){
+							$new_shortcode .= "direction='".$old_sc_atts["direction"]."' ";
+						}
+
+
+					$new_shortcode .= "]";
+
+					// write new shortcode at the place of the old
+					$post_content = substr_replace($post_content, $new_shortcode, $position, strlen($old_shortcode)-1 );
+
+				}
+
+				// assign new content to post
+				$post->post_content = $post_content;
+				wp_update_post($post);
+
+			}
+		}
 		?>
 		<div class="wrap">
 			<h2>Thrixty Player - Allgemeine Einstellungen</h2>
@@ -73,7 +164,7 @@
 			<p>
 				Über den "3D" Button im Artikel Editor (visuell) können Sie einen Shortcode generieren.<br>
 				Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>überschreiben</i></b> die allgemeinen Einstellungen, die sie hier tätigen.<br>
-				Die allgemeinen Einstellungen sind also dafür gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
+				Die allgemeinen Einstellungen sind dafür gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
 			</p>
 			<p>
 				Wenn es für eine Option keinen allgemeingültigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
@@ -85,7 +176,7 @@
 			<br>
 			<p>
 				Wenn <b>keine</b> Einstellungen angegeben wurden, sieht ein typischer Shortcode so aus:<br>
-				<b>[thrixty basepath="http://example.com/thrixtyplayer_listen/" thrixtyplayer-filelist-path-small="test_small.txt" thrixtyplayer-filelist-path-large="test_large.txt" thrixtyplayer-seconds-per-turn="5" thrixtyplayer-direction="forward" thrixtyplayer-sensitivity-x="20" thrixtyplayer-zoom-mode="inbox_minimap" ]</b><br>
+				<b>[thrixty basepath="http://example.com/360_pictures/" thrixtyplayer-filelist-path-small="test_small.txt" thrixtyplayer-filelist-path-large="test_large.txt" thrixtyplayer-seconds-per-turn="5" thrixtyplayer-direction="forward" thrixtyplayer-sensitivity-x="20" thrixtyplayer-zoom-mode="inbox_minimap" ]</b><br>
 				<br>
 				Wenn <b>alle</b> Einstellungen angegeben wurden, sieht ein typischer Shortcode so aus:<br>
 				<b>[thrixty thrixtyplayer-filelist-path-small="test_small.txt" thrixtyplayer-filelist-path-large="test_large.txt" ]</b><br>
@@ -96,10 +187,14 @@
 			<p>
 				<b>Basepath:</b><br>
 				Dies ist der Grundpfad, von dem aus nach den beiden Filelists gesucht wird.<br>
-				Beispiel: <b>http://example.com/thrixtyplayer_listen/[filelist-paths]</b><br>
+				Beispiel: <b>http://example.com/360_pictures/</b>[filelist-paths]<br>
 				Für diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
+				<b>"__SITE__"</b>: Verweist auf die URL der Startseite.<br>
 				<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch für die Ressourcen benutzt wird.<br>
-				<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird. <i>Achtung: Dies ist die GrundURL, die auf den Upload-Hauptordner zeigt! (.../wp-content/uploads/)</i>
+				<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird.<br>
+				<?php if( isset($box3d_options["path"]) ){ ?>
+					Der alte Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
+				<? } ?>
 			</p>
 			<p>
 				<b>Zoom Mode</b><br>
@@ -108,19 +203,21 @@
 				Der Outbox-Zoom erzeugt dagegen ein Extra Fenster an der angegebenen Position.<br>
 				(Im Fullscreen wird aus dem Outbox vorrübergehend in den normalen Inbox-Zoom gewechselt!)<br>
 				Mögliche Werte:<br>
-				<b>inbox</b>, inbox_minimap, outbox_[top, right, bottom, left]
+				<b>inbox</b>, inbox_minimap, outbox_[top, right, bottom, left]<br>
 			</p>
-						<hr>
 			<p>
 				<b>Seconds per Turn</b><br>
 				Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte für alle Objekte gleich sein, um Gleichmäßigkeit über die ganze Seite zu gewährleisten.<br>
-				Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden für eine komplette Drehung
+				Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden für eine komplette Drehung<br>
+				<?php if( isset($box3d_options["framerate"]) ){ ?>
+					<td><?php echo (72 / $box3d_options["framerate"]); ?></td>
+				<? } ?>
 			</p>
 			<p>
 				<b>Sensitivity X</b><br>
 				Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste zählt.<br>
 				Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
-				Die (empfohlene) Standardeinstellung: <b>20</b> Pixel
+				Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
 			</p>
 			<p>
 				<b>Direction</b><br>
@@ -128,8 +225,29 @@
 				Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
 				Objekte, die sich gegen den Uhrzeigersinn drehen, werden "<b>backward</b>" drehend genannt.<br>
 				<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
-				Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".
+				Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
+				<?php if( isset($box3d_options["direction"]) ){ ?>
+					Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
+				<? } ?>
 			</p>
+			<br>
+			<hr>
+			<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
+			<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
+				<p>
+					Fuer den Fall, dass Sie vorher Box3D verwendet haben, können Sie hier automatisch Box3D Shortcodes in Thrixty Shortcodes übersetzen lassen.<br>
+					Bitte bedenken Sie dabei, dass es einige Funktionen nicht mehr gibt oder auch neue dazu gekommen sind.<br>
+					Die Filelists selber werden NICHT kontrolliert!<br>
+					<br>
+					<b>Bitte setzen Sie ihre Einstellungen</b>, bevor Sie diese Funktion nutzen!<br>
+					Insbesondere <b>Basepath</b> sollte gesetzt sein!<br>
+					<br>
+					Geben Sie entweder "all" an, um alle Posts und Pages nach dem alten Shortcode durchsuchen zu lassen, oder eine komma-getrennte Liste mit den entsprechenden IDs.<br>
+					<input name="site_ids" type="text" placeholder="Post IDs or 'all'" />
+					<input name="Submit" type="submit" value="Start Box3D to Thrixty Conversion" /><br>
+					<i><b>ACHTUNG! Dies kann nur per Hand rückgängig gemacht werden!</b></i><br>
+				</p>
+			</form>
 		</div><?php
 	}
 
@@ -274,16 +392,6 @@
 
 
 
-
-
-// Nach Entwicklung entfernen.
-// add_action( 'wp_print_scripts', 'disableAutoSave' );
-function disableAutoSave(){
-	wp_deregister_script('autosave');
-}
-
-
-
 	// add Shortcode Generator Button to TinyMCE Editor
 	add_action('init', 'add_thrixty_gen_button');
 	function add_thrixty_gen_button() {
@@ -327,6 +435,67 @@ function disableAutoSave(){
 			}
 		}
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// FOLGENDEN CODE NACH ENTWICKLUNG ENTFERNEN oder auskommentieren.
+// add_action( 'wp_print_scripts', 'disableAutoSave' );
+// function disableAutoSave(){
+// 	wp_deregister_script('autosave');
+// }
+
+
+// [shortcodefinder find="box3d"]
+// add_shortcode('shortcodefinder', 'wpb_find_shortcode');
+// function wpb_find_shortcode($atts, $content=null) {
+// 	ob_start();
+// 	extract(
+// 		shortcode_atts(
+// 			array(
+// 				'find' => '',
+// 			),
+// 			$atts
+// 		)
+// 	);
+// 	$string = $atts['find'];
+
+// 	$args = array(
+// 		's' => '['.$string,
+// 	);
+
+// 	$the_query = new WP_Query( $args );
+
+// 	if ( $the_query->have_posts() ) {
+// 		echo '<ul>';
+// 		while ( $the_query->have_posts() ) {
+// 			$the_query->the_post();
+// 			echo "<li><a href='".the_permalink()."'>";
+// 				the_title();
+// 			echo "</a></li>";
+// 		}
+// 		echo '</ul>';
+// 	} else {
+// 		echo "Sorry no posts using Shortcode \"[".$string." ]\" found";
+// 	}
+
+// 	wp_reset_postdata();
+// 	return ob_get_clean();
+// }
+
 
 
 
