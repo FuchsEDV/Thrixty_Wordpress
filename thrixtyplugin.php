@@ -73,7 +73,7 @@
 			global $wpdb;
 
 			$post_ids_string = $_POST['site_ids'];
-			$post_arr = [];
+			$post_arr = array();
 
 
 			$wp_query_args = array("s" => "[box3d");
