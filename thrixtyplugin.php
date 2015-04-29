@@ -1,7 +1,7 @@
 <?php
 	/**
 	 * @package Thrixty Player
-	 * @version 1.0
+	 * @version dev1.1
 	 */
 
 	/*
@@ -9,7 +9,7 @@
 		Plugin URI: keine
 		Description: thrixty player plugin
 		Author: Ich
-		Version: 1.0
+		Version: dev1.1
 		Author URI: Ich
 	*/
 
@@ -160,9 +160,6 @@
 				}
 
 				// assign new content to post
-				echo "<pre>";
-					var_dump($post_content);
-				echo "</pre>";
 				$post->post_content = $post_content;
 				wp_update_post($post);
 
