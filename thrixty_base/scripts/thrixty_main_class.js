@@ -1,13 +1,11 @@
-/* thrixty_main_class.js */
 /**
  *  @fileOverview
  *  @author F.Heitmann @ Fuchs EDV Germany
- *  @version dev1.1
+ *  @version dev1.3
  *  @license GPLv3
  *  @module ThrixtyPlayer.MainClass
  */
-
-(function(jQuery){
+;(function(jQuery){
 
 	/**
 	 *  @description ThrixtyPlayer Application
@@ -31,9 +29,36 @@
 	 *  @property {object} event_handler Class Instance of Event Handler.
 	 *  @property {object} drawing_handler Class Instance of Drawing Handler.
 	*/
-	ThrixtyPlayer.MainClass = function(selector){
+	ThrixtyPlayer.MainClass = function(selector, playerpath){
 		// Player Identity
-		this.main_box = selector;
+		this.selector = selector;
+		this.playerpath = playerpath;
+
+
+
+		this.DOM_obj = {
+			main_box: this.selector,
+				showroom: jQuery("<div class=\"showroom\"></div>"),
+					bg_canvas: jQuery("<canvas id=\"bg_canvas\" class=\"canvas\" width=\"0\" height=\"0\"></canvas>"),
+					main_canvas: jQuery("<canvas id=\"main_canvas\" class=\"canvas\" width=\"0\" height=\"0\"></canvas>"),
+					minimap_canvas: jQuery("<canvas id=\"minimap_canvas\" class=\"canvas\" width=\"0\" height=\"0\" style=\"display:none;\"></canvas>"),
+					marker: jQuery("<div id=\"marker\" style=\"display:none;\"></div>"),
+					progress_container: jQuery("<div class=\"progress_container\" ></div>"),
+						progress_bar_small: jQuery("<div class=\"progress_bar_small\" state=\"unloaded\" style=\"width: 0%;\"></div>"),
+						progress_bar_large: jQuery("<div class=\"progress_bar_large\" state=\"unloaded\" style=\"width: 0%;\"></div>"),
+				controls: jQuery("<div class=\"controls\"></div>"),
+					control_container_one: jQuery("<div class=\"control_container_center\" ></div>"),
+						prev_btn: jQuery("<button id=\"prev_btn\" class=\"ctrl_buttons\" state=\"step\" disabled ></button>"),
+						play_btn: jQuery("<button id=\"play_btn\" class=\"ctrl_buttons\" state=\"play\" disabled ></button>"),
+						next_btn: jQuery("<button id=\"next_btn\" class=\"ctrl_buttons\" disabled ></button>"),
+						zoom_btn: jQuery("<button id=\"zoom_btn\" class=\"ctrl_buttons\" state=\"zoomin\" disabled ></button>"),
+						size_btn: jQuery("<button id=\"size_btn\" class=\"ctrl_buttons\" state=\"fullpage\" disabled ></button>"),
+				zoom_canvas: jQuery("<canvas id=\"zoom_canvas\" width=\"0\" height=\"0\" style=\"display: none;\"></canvas>"),
+				controls_cache: jQuery("<div class=\"controls_cache\" style=\"display: none;\"></div>"),
+				image_cache_small: jQuery("<div class=\"image_cache_small\" style=\"display: none;\"></div>"),
+				image_cache_large: jQuery("<div class=\"image_cache_large\" style=\"display: none;\"></div>"),
+		}
+
 
 		// Class Relations
 		this.event_handler = null;
@@ -49,7 +74,10 @@
 			seconds_per_turn: 5,
 			sensitivity_x: 20,
 			sensitivity_y: 50,
-			zoom_mode: "inbox_minimap",
+			zoom_mode: "inbox",
+			zoom_control: "progressive",
+			outbox_position: "right",
+			position_indicator: "minimap",
 		};
 		// The settings.direction is used multiplicative! It corresponds to "Base direction", so the rest of the program can treat both base directions as "forward"!
 
@@ -100,17 +128,15 @@
 
 
 
+
+
+
 		// State Variables
 		this.loading_state = "none"; // none|loading|playable|zoomable
 		this.is_rotating = false;
 		this.is_zoomed = false;
 		this.is_fullscreen = false;
 
-
-
-		// Canvas Events
-		this.last_x = 0;
-		this.turned_x = 0;
 
 
 
@@ -129,18 +155,18 @@
 
 		// read filelists
 		var small_fl_read = this.read_filelist(this.small);
-		if( true !== small_fl_read ){
+		if( small_fl_read !== true ){
 			throw new Error("The Base Filelist Wasn't Loaded.\n"+small_fl_read);
 			return false;
 		}
 		var large_fl_read = this.read_filelist(this.large);
-		if( true !== large_fl_read ){
+		if( large_fl_read !== true ){
 			throw new Error("The Zoom Filelist Wasn't Loaded.\n"+large_fl_read);
 			return false;
 		}
 
 		// build the player
-		this.generate_html_structure();
+		this.build_html_structure();
 
 		// new EventHandler for this Player
 		this.event_handler = new ThrixtyPlayer.EventHandler(this);
@@ -159,9 +185,9 @@
 
 
 		// load small pictures
-		this.load_all_images(this.small, this.image_cache_small);
+		this.load_all_images(this.small, this.DOM_obj.image_cache_small);
 		// preload first image (for sizing purposes)
-		this.load_one_image(this.large.images[0], this.image_cache_large);
+		this.load_one_image(this.large.images[0], this.DOM_obj.image_cache_large);
 	};
 
 	/**
@@ -169,51 +195,86 @@
 	 */
 	ThrixtyPlayer.MainClass.prototype.parse_settings = function (){
 		// loop through all attributes to get option values
-		var main_box_attributes = this.main_box[0].attributes;
+		var main_box_attributes = this.DOM_obj.main_box[0].attributes;
 		var main_box_attr_count = main_box_attributes.length;
 		for( var i=0; i<main_box_attr_count; i++ ){
 			var attr = main_box_attributes[i];
 			switch( attr.name ){
 				case "thrixty-basepath":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.settings.basepath = String(attr.value);
 					}
 					break;
 				case "thrixty-direction":
-					if( "1" == attr.value || "forward" == attr.value ){
+					if( attr.value == "1" || attr.value == "forward" ){
 						this.settings.direction = 1;
-					} else if( "-1" == attr.value || "backward" == attr.value ){
+					} else if( attr.value == "-1" || attr.value == "backward" ){
 						this.settings.direction = -1;
 					}
 					break;
 				case "thrixty-filelist-path-small":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.small.filepath = String(attr.value);
 					}
 					break;
 				case "thrixty-filelist-path-large":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.large.filepath = String(attr.value);
 					}
 					break;
 				case "thrixty-seconds-per-turn":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.settings.seconds_per_turn = parseInt(attr.value);
 					}
 					break;
 				case "thrixty-sensitivity-x":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.settings.sensitivity_x = parseInt(attr.value);
 					}
 					break;
 				case "thrixty-sensitivity-y":
-					if( "" != attr.value ){
+					if( attr.value != "" ){
 						this.settings.sensitivity_y = parseInt(attr.value);
 					}
 					break;
 				case "thrixty-zoom-mode":
-					if( "" != attr.value ){
-						this.settings.zoom_mode = String(attr.value);
+					// proper values:  -inbox -outbox -none(|empty)
+					if( attr.value == "inbox" ){
+						this.settings.zoom_mode = "inbox";
+					} else if( attr.value == "outbox" ){
+						this.settings.zoom_mode = "outbox";
+					// TODO; dies muss noch benutzt werden...
+					} else if( attr.value == "none" || attr.value == "" ){
+						this.settings.zoom_mode = "";
+					}
+					break;
+				case "thrixty-zoom-control":
+					if( attr.value == "classic" ){
+						this.settings.zoom_control = "classic";
+					} else {
+						this.settings.zoom_control = "progressive";
+					}
+					break;
+				case "thrixty-outbox-position":
+					// proper value: -right -left -top -bottom
+					if( attr.value == "right" ){
+						this.settings.outbox_position = "right";
+					} else if( attr.value == "left" ){
+						this.settings.outbox_position = "left";
+					} else if( attr.value == "top" ){
+						this.settings.outbox_position = "top";
+					} else if( attr.value == "bottom" ){
+						this.settings.outbox_position = "bottom";
+					}
+					break;
+				case "thrixty-position-indicator":
+					// proper values: -minimap -marker -none(|empty)
+					if( attr.value == "minimap" ){
+						this.settings.position_indicator = "minimap";
+					} else if( attr.value == "marker" ){
+						this.settings.position_indicator = "marker";
+					} else if( attr.value == "none" || attr.value == "" ){
+						this.settings.position_indicator = "";
 					}
 					break;
 				default:
@@ -225,45 +286,53 @@
 	 *  @description This function generates HTML-Code and keeps track of generated elements.
 	 *  @return {bool} Was everything generated correctly? (atm inoperable)
 	 */
-	ThrixtyPlayer.MainClass.prototype.generate_html_structure = function(){
+	ThrixtyPlayer.MainClass.prototype.build_html_structure = function(){
 		// this is the main part of the player - image show area
-		this.main_box.attr("tabindex", "0");
-		this.main_box.css("outline", "none");
-			this.pictures = jQuery("<div class=\"pictures\"></div>");
-			this.main_box.append(this.pictures);
-				this.main_canvas = jQuery("<canvas id=\"main_canvas\" width=\"0\" height=\"0\">Your Browser does not support HTML5!</canvas>");
-				this.pictures.append(this.main_canvas);
-				this.progress_container = jQuery("<div class=\"progress_container\" ></div>");
-				this.pictures.append(this.progress_container);
-					this.progress_bar_small = jQuery("<div class=\"progress_bar_small\" state=\"unloaded\" style=\"width: 0%;\"></div>");
-					this.progress_container.append(this.progress_bar_small);
-					this.progress_bar_large = jQuery("<div class=\"progress_bar_large\" state=\"unloaded\" style=\"width: 0%;\"></div>");
-					this.progress_container.append(this.progress_bar_large);
-				this.zoom_box = jQuery("<canvas id=\"zoombox_canvas\" width=\"0\" height=\"0\" style=\"display: none;\"></canvas>");
-				this.pictures.append(this.zoom_box);
+		this.DOM_obj.main_box.attr("tabindex", "0");
+		this.DOM_obj.main_box.css("outline", "none");
+			this.DOM_obj.main_box.append(this.DOM_obj.showroom);
+				this.DOM_obj.showroom.append(this.DOM_obj.bg_canvas);
+				this.DOM_obj.showroom.append(this.DOM_obj.main_canvas);
+				this.DOM_obj.showroom.append(this.DOM_obj.minimap_canvas);
+				this.DOM_obj.showroom.append(this.DOM_obj.marker);
+				this.DOM_obj.showroom.append(this.DOM_obj.progress_container);
+					this.DOM_obj.progress_container.append(this.DOM_obj.progress_bar_small);
+					this.DOM_obj.progress_container.append(this.DOM_obj.progress_bar_large);
 
 			// these are the control buttons for the app
-			this.controls = jQuery("<div class=\"controls\"></div>");
-			this.main_box.append(this.controls);
-				this.control_container_one = jQuery("<div class=\"control_container_center\" ></div>");
-				this.controls.append(this.control_container_one);
-					this.prev_btn = jQuery("<button id=\"prev_btn\" class=\"ctrl_buttons\" state=\"step\" disabled ></button>");
-					this.control_container_one.append(this.prev_btn);
-					this.play_btn = jQuery("<button id=\"play_btn\" class=\"ctrl_buttons\" state=\"play\" disabled ></button>");
-					this.control_container_one.append(this.play_btn);
-					this.next_btn = jQuery("<button id=\"next_btn\" class=\"ctrl_buttons\" disabled ></button>");
-					this.control_container_one.append(this.next_btn);
-					this.zoom_btn = jQuery("<button id=\"zoom_btn\" class=\"ctrl_buttons\" state=\"zoomin\" disabled ></button>");
-					this.control_container_one.append(this.zoom_btn);
-					this.size_btn = jQuery("<button id=\"size_btn\" class=\"ctrl_buttons\" state=\"fullpage\" disabled ></button>");
-					this.control_container_one.append(this.size_btn);
-				this.controls.append( jQuery("<div style=\"clear: both;\"></div>") );
+			this.DOM_obj.main_box.append(this.DOM_obj.controls);
+				this.DOM_obj.controls.append(this.DOM_obj.control_container_one);
+					this.DOM_obj.control_container_one.append(this.DOM_obj.prev_btn);
+					this.DOM_obj.control_container_one.append(this.DOM_obj.play_btn);
+					this.DOM_obj.control_container_one.append(this.DOM_obj.next_btn);
+					this.DOM_obj.control_container_one.append(this.DOM_obj.zoom_btn);
+					this.DOM_obj.control_container_one.append(this.DOM_obj.size_btn);
+				this.DOM_obj.controls.append( jQuery("<div style=\"clear: both;\"></div>") );
+
+			// Zoom Box for Outbox Zoom (invisible on stadard)
+			this.DOM_obj.main_box.append(this.DOM_obj.zoom_canvas);
 
 			// these will store the image preloads
-			this.image_cache_small = jQuery("<div class=\"image_cache_small\" style=\"display: none;\"></div>");
-			this.main_box.append(this.image_cache_small);
-			this.image_cache_large = jQuery("<div class=\"image_cache_large\" style=\"display: none;\"></div>");
-			this.main_box.append(this.image_cache_large);
+			// this.DOM_obj.main_box.append(this.DOM_obj.controls_cache);
+				// cache control icons
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/expand.svg\">")      );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/pause.svg\">")       );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/plus.svg\">")        );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/vorwaertz.svg\">")   );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/expand_w.svg\">")    );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/pause_w.svg\">")     );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/plus_w.svg\">")      );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/vorwaertz_w.svg\">") );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/minus.svg\">")       );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/play.svg\">")        );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/shrink.svg\">")      );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/zurueck.svg\">")     );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/minus_w.svg\">")     );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/play_w.svg\">")      );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/shrink_w.svg\">")    );
+				this.DOM_obj.controls_cache.append( jQuery("<img src=\""+this.playerpath+"style/images/zurueck_w.svg\">")   );
+			this.DOM_obj.main_box.append(this.DOM_obj.image_cache_small);
+			// this.DOM_obj.main_box.append(this.DOM_obj.image_cache_large);
 
 		// no errors (?)
 		return true;
@@ -338,6 +407,7 @@
 			current_elem.jq_elem.one("load error", [load_obj, current_elem], load_obj.load_event.bind(this) );
 		}
 	};
+	// ThrixtyPlayer.MainClass.prototype.set_ = function(){}
 	/**
 	 *  @description This function is being called on load of the small images.
 	 *  @param  {object} load_event The Event, which triggered this function.
@@ -353,30 +423,50 @@
 			var load_obj = params[0];
 			var current_elem = params[1];
 
+			log(load_event.type);
+
 			// if this load was successful
-			if( "load" == load_event.type ){
+			if( load_event.type == "load" ){
 				// update object to success
 				load_obj.images_loaded += 1;
 				current_elem.elem_loaded = true;
 
 				// If this was the first image that was being loaded,
-				if( null == load_obj.first_loaded_image_id ){
+				if( load_obj.first_loaded_image_id == null ){
 					// register it,
 					load_obj.first_loaded_image_id = current_elem.id;
 
+							var vogl = function(){
 								// TODO: Dies in eine Funktion verpacken. Diese Programmlogik gehört hier eigentlich nicht hin.
 								// set main_canvas dimensions to those of the first element
 								// show and hide is being used because of reasons (the reasons are - what else could it be - Internet Explorer)
 								current_elem.jq_elem.show();
-								this.main_canvas[0].width = current_elem.jq_elem[0].naturalWidth;
-								this.main_canvas[0].height = current_elem.jq_elem[0].naturalHeight;
-								this.zoom_box[0].width = current_elem.jq_elem[0].naturalWidth;
-								this.zoom_box[0].height = current_elem.jq_elem[0].naturalHeight;
+
+								// background
+								this.DOM_obj.bg_canvas[0].width = current_elem.jq_elem[0].naturalWidth;
+								this.DOM_obj.bg_canvas[0].height = current_elem.jq_elem[0].naturalHeight;
+
+								// main
+								this.DOM_obj.main_canvas[0].width = current_elem.jq_elem[0].naturalWidth;
+								this.DOM_obj.main_canvas[0].height = current_elem.jq_elem[0].naturalHeight;
+									// set drawing handlers canvas to main canvas
+									this.drawing_handler.canvas = this.DOM_obj.main_canvas;
+
+								// minimap
+								this.DOM_obj.minimap_canvas[0].width = current_elem.jq_elem[0].naturalWidth;
+								this.DOM_obj.minimap_canvas[0].height = current_elem.jq_elem[0].naturalHeight;
+
+								// zoom box
+								this.DOM_obj.zoom_canvas[0].width = current_elem.jq_elem[0].naturalWidth;
+								this.DOM_obj.zoom_canvas[0].height = current_elem.jq_elem[0].naturalHeight;
+
 								current_elem.jq_elem.hide();
-								this.drawing_handler.canvas = this.main_canvas;
+							}.bind(this);
 
 					// and give the dimensions to the drawing handler.
-					this.drawing_handler.set_small_dimensions(current_elem.jq_elem);
+					this.drawing_handler.set_small_image_size(current_elem.jq_elem);
+					// calc dimension ratio
+					this.drawing_handler.calculate_image_size_ratio();
 
 					// The whole purpose of the following block is to make sure,
 					//   that the starting image WILL be loaded.
@@ -385,9 +475,11 @@
 					//   is not drawable yet.
 					var current_count = 0;
 					var start_img_draw = function(){
-						if( 5 > current_count && !this.isLoaded){
+						if( current_count < 5 && !this.isLoaded){
 							// console.log("ich bin durchgang "+current_count);
 							current_count += 1;
+
+							vogl();
 
 							// draw image to canvas
 							this.drawing_handler.draw_current_image();
@@ -425,22 +517,24 @@
 			var current_elem = params[1];
 
 			// if this load was successful
-			if( "load" == load_event.type ){
+			if( load_event.type == "load" ){
 				// update object to success
 				load_obj.images_loaded += 1;
 				current_elem.elem_loaded = true;
 
 				// If this was the first image that was being loaded,
-				if( null == load_obj.first_loaded_image_id ){
+				if( load_obj.first_loaded_image_id == null ){
 					// register it,
 					load_obj.first_loaded_image_id = current_elem.id;
 					// and give the dimensions to the drawing handler.
-					this.drawing_handler.set_large_dimensions(current_elem.jq_elem);
+					this.drawing_handler.set_large_image_size(current_elem.jq_elem);
+					// calc imension ratio
+					this.drawing_handler.calculate_image_size_ratio();
 				}
 
 				// When this image is current, redraw the current image.
 				// This large image is likely to be drawn in zoom.
-				if( current_elem.id == this.large.active_image_id ){
+				if( this.large.active_image_id == current_elem.id ){
 					this.drawing_handler.draw_current_image();
 				}
 
@@ -486,17 +580,17 @@
 	ThrixtyPlayer.MainClass.prototype.update_loading_state = function(){
 		// small images progress bar
 		var small_loaded_percentage = ( (this.small.images_loaded+this.small.images_errored) / this.small.images_count);
-		if( 1 <= small_loaded_percentage ){
+		if( small_loaded_percentage >= 1 ){
 			this.small.is_loaded = true;
 		}
-		this.refresh_progress(this.progress_bar_small, small_loaded_percentage);
+		this.refresh_progress(this.DOM_obj.progress_bar_small, small_loaded_percentage);
 
 		// large images progress bar
 		var large_loaded_percentage = ( (this.large.images_loaded+this.large.images_errored) / this.large.images_count);
-		if( 1 <= large_loaded_percentage ){
+		if( large_loaded_percentage >= 1 ){
 			this.large.is_loaded = true;
 		}
-		this.refresh_progress(this.progress_bar_large, large_loaded_percentage);
+		this.refresh_progress(this.DOM_obj.progress_bar_large, large_loaded_percentage);
 		// TODO: Diesen oberen Teil überdenken - Wofür wird (noch) ein Ladezustand benötigt?
 
 
@@ -512,34 +606,31 @@
 
 		// Disable all GUI elements.
 		if( !this.small.is_loaded && !this.large.is_loaded ){
-			if( "loading" != this.loading_state ){
-				this.size_btn.prop('disabled', true);
-				this.prev_btn.prop('disabled', true);
-				this.play_btn.prop('disabled', true);
-				this.next_btn.prop('disabled', true);
-				this.zoom_btn.prop('disabled', true);
+			if( this.loading_state != "loading" ){
 				this.loading_state = "loading";
-				log("zustandswechsel zu: loading");
+				this.DOM_obj.size_btn.prop('disabled', true);
+				this.DOM_obj.prev_btn.prop('disabled', true);
+				this.DOM_obj.play_btn.prop('disabled', true);
+				this.DOM_obj.next_btn.prop('disabled', true);
+				this.DOM_obj.zoom_btn.prop('disabled', true);
 			}
 		}
 		// Enable GUI.
 		if( this.small.is_loaded && !this.large.is_loaded ){
-			if( "playable" != this.loading_state ){
-				this.size_btn.prop('disabled', false);
-				this.prev_btn.prop('disabled', false);
-				this.play_btn.prop('disabled', false);
-				this.next_btn.prop('disabled', false);
-				this.zoom_btn.prop('disabled', false);
+			if( this.loading_state != "playable" ){
 				this.loading_state = "playable";
-				log("zustandswechsel zu: playable");
+				this.DOM_obj.size_btn.prop('disabled', false);
+				this.DOM_obj.prev_btn.prop('disabled', false);
+				this.DOM_obj.play_btn.prop('disabled', false);
+				this.DOM_obj.next_btn.prop('disabled', false);
+				this.DOM_obj.zoom_btn.prop('disabled', false);
 				this.all_images_loaded();
 			}
 		}
 		// ???relic???
 		if( this.small.is_loaded && this.large.is_loaded ){
-			if( "done" != this.loading_state ){
+			if( this.loading_state != "done" ){
 				this.loading_state = "done";
-				log("zustandswechsel zu: done");
 			}
 		}
 	};
@@ -551,17 +642,17 @@
 	ThrixtyPlayer.MainClass.prototype.refresh_progress = function(progress_bar, percentage){
 
 		// NaN or negative   (-n...0)
-		if( isNaN(percentage) || 0 >= percentage ){
+		if( isNaN(percentage) || percentage <= 0 ){
 			progress_bar.attr("state", "unloaded");
 			progress_bar.css("width", "0%");
 
 		// under 100%        (0,01...0,99)
-		} else if( 1 > percentage ){
+		} else if( percentage < 1 ){
 			progress_bar.attr("state", "loading");
 			progress_bar.css("width", (percentage * 100)+"%");
 
 		// over 100%         (1...n)
-		} else if( 1 <= percentage ){
+		} else if( percentage >= 1 ){
 			progress_bar.attr("state", "loaded");
 			progress_bar.css("width", "100%");
 		}
@@ -571,6 +662,7 @@
 	 */
 	ThrixtyPlayer.MainClass.prototype.all_images_loaded = function(){
 		// start rotation for startup.
+		// autostart / autoplay
 		this.start_rotation();
 	};
 
@@ -592,14 +684,14 @@
 		// set rotation params
 		this.is_rotating = true;
 		// set play/pause btn to play
-		this.play_btn.attr('state', 'pause')
+		this.DOM_obj.play_btn.attr('state', 'pause')
 
 		// define repeating function
-		if( 0 < this.rotation_direction ){ // forward
+		if( this.rotation_direction > 0 ){ // forward
 			var rotation_func = function(){
 				root.nextImage();
 			};
-		} else if( 0 > this.rotation_direction ){ // backward
+		} else if( this.rotation_direction < 0 ){ // backward
 			var rotation_func = function(){
 				root.previousImage();
 			};
@@ -623,7 +715,7 @@
 	ThrixtyPlayer.MainClass.prototype.stop_rotation = function(){
 		if( this.is_rotating ){
 			this.is_rotating = false;
-			this.play_btn.attr('state', 'play');
+			this.DOM_obj.play_btn.attr('state', 'play');
 			// end animation by stopping the interval
 			clearInterval(this.interval_id);
 			this.interval_id = 0;
@@ -651,62 +743,46 @@
 	 *  @param  {Integer} distance_x The distance in x dimension, how far the mouse travelled from its starting position.
 	 */
 	ThrixtyPlayer.MainClass.prototype.distance_rotation = function(distance_x){
-		// The given distance in x dimension tells, how much the mouse travelled away from the starting point of this click cycle.
-		// It DOES NOT tell how much distance was travelled since the last incantation of this function!
+		// mache umdrehungen anhand des distance_x mit einer bestimmten übersetzung
 
-
-
-
-
-		// keep track of done turns.
-		var current_turns = this.turned_x;
-
-		// Pixel per Degree (Application Parameter): The cursor needs to travel 2 pixel, to turn the object by 1 degree.  =>  2px/1°
+		// Pixel per Degree (Application Parameter): The cursor needs to travel 2 pixel, to turn the object by 1 degree.  =>  2px/1° => 720px/360°
 		var pixel_per_degree = 2;
 
-
-				if( this.is_zoomed ){
-					// Degree per Image: How many degree the object needs to turn, to show the next image. Example:  360°/72img = 5°/img
-					var degree_per_image = 360/this.large.images_count;//360°/n*img
-				} else {
-					// Degree per Image: How many degree the object needs to turn, to show the next image. Example:  360°/72img = 5°/img
-					var degree_per_image = 360/this.small.images_count;//360°/n*img
-				}
-
+		if( this.is_zoomed ){
+			// Degree per Image: How many degree the object needs to turn, to show the next image. Example:  360°/72img = 5°/img
+			var degree_per_image = 360/this.large.images_count;//360°/n*img
+		} else {
+			// Degree per Image: How many degree the object needs to turn, to show the next image. Example:  360°/12img = 30°/img
+			var degree_per_image = 360/this.small.images_count;//360°/n*img
+		}
 
 		// Pixel per Image: How many pixel the cursor needs to travel, to show the next image. Example:  5°/img * 2px/°  <=>  5*2px / img  <=> 10px/img
 		var pixel_per_image = pixel_per_degree * degree_per_image;
 
-		// wanted_turns is the amount of steps to make.
-		// f(x) = x / a;
-		// The offset "+ a/2" is for defining the starting click position as being the middle, so from that position one need to travel 5 px to left or right to switch to the next image.
-		// f(x) =  ( x + a/2 ) / a;
-		//     <=> ( x/a + 0.5 );
-		var wanted_turns = Math.floor( distance_x/pixel_per_image + 0.5);
 
-		// reassign value ASAP to "release" it for the next event
-		this.turned_x = wanted_turns;
+		var rest_distanz = ( distance_x % pixel_per_image );
 
-		// When swiping to the right, the number of turns_to_do is a positive number.
-		//   Though, a swipe to the right means "turn backwards"!
-		//   Hence the calculated turns_to_do are to be inverted:
-		// (wanted_turns - current_turns)*-1  ===  current_turns - wanted_turns  [!!!]
-		var turns_to_do = current_turns - wanted_turns;
+		var anzahl_nextimages = ( distance_x - rest_distanz ) / pixel_per_image;
 
 
-				if( this.is_zoomed ){
-					this.change_active_image_id(this.large, turns_to_do);
-					// assign large to small
-					this.small.active_image_id = this.large.images[this.large.active_image_id].to_small;
-				} else {
-					this.change_active_image_id(this.small, turns_to_do);
-					// assign small to large
-					this.large.active_image_id = this.small.images[this.small.active_image_id].to_large;
-				}
+		// the basic movement is backwards, so invert the value
+		anzahl_nextimages = anzahl_nextimages * -1;
 
+		//
+		if( this.is_zoomed ){
+			this.change_active_image_id(this.large, anzahl_nextimages);
+			// assign large to small
+			this.small.active_image_id = this.large.images[this.large.active_image_id].to_small;
+		} else {
+			this.change_active_image_id(this.small, anzahl_nextimages);
+			// assign small to large
+			this.large.active_image_id = this.small.images[this.small.active_image_id].to_large;
+		}
 
 		// update View
 		this.drawing_handler.draw_current_image();
+
+		return rest_distanz;
 	};
 	/**
 	 *  @description This function is rendering the next Image.
@@ -743,6 +819,9 @@
 	 */
 	ThrixtyPlayer.MainClass.prototype.change_active_image_id = function(load_obj, amount){
 
+		// log(this.settings.direction);
+
+
 		// The given amount is multiplicated with the BASE direction, so whichever base direction is used, it will still be treated as "forward".
 		amount = amount * this.settings.direction;
 
@@ -751,7 +830,7 @@
 
 		id = (id + amount) % count;
 
-		if( 0 > id ){
+		if( id < 0 ){
 			id = id + count;
 		}
 		load_obj.active_image_id = id;
@@ -766,48 +845,33 @@
 	 *  @description This function switches the player over to the zoom state.
 	 */
 	ThrixtyPlayer.MainClass.prototype.start_zoom = function(){
+		// set zoom flag
 		this.is_zoomed = true;
-		this.zoom_btn.attr('state', 'zoomout');
-		var zoom_mode = this.settings.zoom_mode;
-		// versuch, outbox probleme zu fixen...
 
-		// simulate zoom start at the center of the canvas
-		var click_x = this.main_canvas.offset().left + ( this.main_canvas.width() / 2 );
-		var click_y = this.main_canvas.offset().top + ( this.main_canvas.height() / 2 );
-		this.drawing_handler.set_mouseposition(click_x, click_y);
-		this.drawing_handler.draw_current_image();
+		// do main_class's part of start_zoom routine:
+			// set zoom button to zoomout
+			this.DOM_obj.zoom_btn.attr('state', 'zoomout');
 
+			// simulate zoom start at the center of the canvas
+			var click_x = this.DOM_obj.main_canvas.offset().left + ( this.DOM_obj.main_canvas.width() / 2 );
+			var click_y = this.DOM_obj.main_canvas.offset().top + ( this.DOM_obj.main_canvas.height() / 2 );
+			this.drawing_handler.set_absolute_mouseposition(click_x, click_y);
 
-		switch( zoom_mode ){
-			case "outbox_top":
-				if( !this.is_fullscreen ){
-					// make the box visible on top
-					this.set_outbox_top();
-					break;
-				} // else: Fallthrough to Default
-			case "outbox_right":
-				if( !this.is_fullscreen ){
-					// make the box visible on the right
-					this.set_outbox_right();
-					break;
-				} // else: Fallthrough to Default
-			case "outbox_bottom":
-				if( !this.is_fullscreen ){
-					// make the box visible on the bottom
-					this.set_outbox_bottom();
-					break;
-				} // else: Fallthrough to Default
-			case "outbox_left":
-				if( !this.is_fullscreen ){
-					// make the box visible on the left
-					this.set_outbox_left();
-					break;
-				} // else: Fallthrough to Default
-			default:
-				// make the box invisible
-				this.zoom_box.hide();
-				break;
-		}
+			// check for position indicator wanted (for example a minimap)
+			if( this.settings.position_indicator == "minimap" ){
+				this.DOM_obj.minimap_canvas.show();
+			} else if( this.settings.position_indicator == "marker" ){
+				this.DOM_obj.minimap_canvas.show();
+				this.DOM_obj.marker.show();
+			}
+
+			// if zoom mode is outbox and not in fullscreen mode
+			if( this.settings.zoom_mode == "outbox" && !this.is_fullscreen ){
+				this.setup_outbox();
+			}
+
+			// draw current picture
+			this.drawing_handler.draw_current_image();
 	};
 	/**
 	 *  @description This function switches the player back to the unzoomed state.
@@ -815,10 +879,14 @@
 	ThrixtyPlayer.MainClass.prototype.stop_zoom = function(){
 		// turn off zoom
 		this.is_zoomed = false;
-		this.zoom_btn.attr('state', 'zoomin');
+		this.DOM_obj.zoom_btn.attr('state', 'zoomin');
 
 		// hide zoombox
-		this.zoom_box.hide();
+		this.DOM_obj.zoom_canvas.hide();
+		// hide minimap_box
+		this.DOM_obj.minimap_canvas.hide();
+		// hide marker
+		this.DOM_obj.marker.hide();
 		// draw unzoomed picture
 		this.drawing_handler.draw_current_image();
 	};
@@ -841,112 +909,84 @@
 			// }
 		}
 	};
-	/**
-	 *  @description This function is adjusting offset values for DrawingHandler.<br>It is being called by those functions that are making it possible to move the zoomed cutout.
-	 */
-	ThrixtyPlayer.MainClass.prototype.move_zoom = function(current_x, current_y){
-		this.drawing_handler.set_mouseposition(current_x, current_y);
-		this.drawing_handler.draw_current_image();
-	};
 
 
 
 
 
 	/**
-	 *  @description This function displays the zoomed box at the top of the canvas.
+	 * @description blabla
 	 */
-	ThrixtyPlayer.MainClass.prototype.set_outbox_top = function(){
-		this.zoom_box.show();
+	ThrixtyPlayer.MainClass.prototype.setup_outbox = function(){
+		// show zoom box at the selected position
+		this.DOM_obj.zoom_canvas.show();
+
+		// get main_canvas info
 		var main_canvas = this.get_main_canvas_dimensions();
 
-		// set outbox canvas koordinates
-		this.zoom_box.css('top', main_canvas.h * -1);
-		this.zoom_box.css('left', 0 );
-		this.zoom_box.height( main_canvas.h );
-		this.zoom_box.width( main_canvas.w );
+		// set zoom_canvas width
+		this.DOM_obj.zoom_canvas[0].height = main_canvas.draw_h;
+		this.DOM_obj.zoom_canvas[0].width  = main_canvas.draw_w;
+		this.DOM_obj.zoom_canvas.height( main_canvas.vp_h );
+		this.DOM_obj.zoom_canvas.width( main_canvas.vp_w );
+
+		// set zoom_canvas position
+		if( this.settings.outbox_position == "right" ){
+			this.DOM_obj.zoom_canvas.css('top', 0);
+			this.DOM_obj.zoom_canvas.css('left', main_canvas.vp_w );
+		} else if( this.settings.outbox_position == "left" ){
+			this.DOM_obj.zoom_canvas.css('top', 0);
+			this.DOM_obj.zoom_canvas.css('left', main_canvas.vp_w * -1 );
+		} else if( this.settings.outbox_position == "top" ){
+			this.DOM_obj.zoom_canvas.css('top', main_canvas.vp_h * -1);
+			this.DOM_obj.zoom_canvas.css('left', 0 );
+		} else if( this.settings.outbox_position == "bottom" ){
+			// respect the control bar...
+			this.DOM_obj.zoom_canvas.css('top', this.DOM_obj.main_box.height() );
+			this.DOM_obj.zoom_canvas.css('left', 0 );
+		}
 	};
-	/**
-	 *  @description This function displays the zoomed box at the right of the canvas.
-	 */
-	ThrixtyPlayer.MainClass.prototype.set_outbox_right = function(){
-		this.zoom_box.show();
-		var main_canvas = this.get_main_canvas_dimensions();
-
-		// set outbox canvas koordinates
-		this.zoom_box.css('top', 0);
-		this.zoom_box.css('left', main_canvas.w );
-		this.zoom_box.height( main_canvas.h );
-		this.zoom_box.width( main_canvas.w );
-	};
-	/**
-	 *  @description This function displays the zoomed box at the bottom of the canvas.
-	 */
-	ThrixtyPlayer.MainClass.prototype.set_outbox_bottom = function(){
-		this.zoom_box.show();
-		var main_canvas = this.get_main_canvas_dimensions();
-
-		// set outbox canvas koordinates
-		this.zoom_box.css('top', main_canvas.h );
-		this.zoom_box.css('left', 0 );
-		this.zoom_box.height( main_canvas.h );
-		this.zoom_box.width( main_canvas.w );
-	};
-	/**
-	 *  @description This function displays the zoomed box at the left of the canvas.
-	 */
-	ThrixtyPlayer.MainClass.prototype.set_outbox_left = function(){
-		this.zoom_box.show();
-		var main_canvas = this.get_main_canvas_dimensions();
-
-		// set outbox canvas koordinates
-		this.zoom_box.css('top', 0);
-		this.zoom_box.css('left', main_canvas.w * -1 );
-		this.zoom_box.height( main_canvas.h );
-		this.zoom_box.width( main_canvas.w );
-	};
-
-
-
-
-
 	/**
 	 *  @description This function adjusts the canvas to a full page size.
 	 */
 	ThrixtyPlayer.MainClass.prototype.enter_fullpage = function(){
 
-		this.size_btn.attr('state', 'normalsize');
+		this.DOM_obj.size_btn.attr('state', 'normalsize');
 		this.is_fullscreen = true;
 
 		this.stop_zoom();
 
-		this.main_box.css('position', 'fixed');
-		this.main_box.css('top', '5px');
-		this.main_box.css('right', '5px');
-		this.main_box.css('bottom', '5px');
-		this.main_box.css('left', '5px');
-		this.main_box.css('background', 'white');
-		this.main_box.css('z-index', '9999');
-		this.pictures.css('height', 'calc(100% - '+this.controls.outerHeight()+'px)');
+		this.DOM_obj.main_box.css('position', 'fixed');
+		this.DOM_obj.main_box.css('top', '5px');
+		this.DOM_obj.main_box.css('right', '5px');
+		this.DOM_obj.main_box.css('bottom', '5px');
+		this.DOM_obj.main_box.css('left', '5px');
+		this.DOM_obj.main_box.css('background', 'white');
+		this.DOM_obj.main_box.css('z-index', '9999');
+		this.DOM_obj.main_box.css('max-width', 'calc(100% - 10px)');
+		this.DOM_obj.main_box.css('max-height', 'calc(100% - 10px)');
+		this.DOM_obj.showroom.css('height', 'calc(100% - '+this.DOM_obj.controls.outerHeight()+'px)');
 	};
 	/**
 	 *  @description This function reverts the fullpage sized canvas to a normal size.
 	 */
 	ThrixtyPlayer.MainClass.prototype.quit_fullpage = function(){
 
-		this.size_btn.attr('state', 'fullpage');
+		this.DOM_obj.size_btn.attr('state', 'fullpage');
 		this.is_fullscreen = false;
 
 		this.stop_zoom();
 
-		this.main_box.css('position', '');
-		this.main_box.css('top', '');
-		this.main_box.css('right', '');
-		this.main_box.css('bottom', '');
-		this.main_box.css('left', '');
-		this.main_box.css('background', '');
-		this.main_box.css('z-index', '');
-		this.pictures.css('height', '');
+		this.DOM_obj.main_box.css('position', '');
+		this.DOM_obj.main_box.css('top', '');
+		this.DOM_obj.main_box.css('right', '');
+		this.DOM_obj.main_box.css('bottom', '');
+		this.DOM_obj.main_box.css('left', '');
+		this.DOM_obj.main_box.css('background', '');
+		this.DOM_obj.main_box.css('z-index', '');
+		this.DOM_obj.main_box.css('max-width', '');
+		this.DOM_obj.main_box.css('max-height', '');
+		this.DOM_obj.showroom.css('height', '');
 	};
 	/**
 	 *  @description Toggles between fullpage size and normal size.
@@ -962,10 +1002,25 @@
 
 
 
+	/**
+	 *  @description Destroy this instance to stop the Player from playing.
+	 */
+	ThrixtyPlayer.MainClass.prototype.destroy_player = function(){
+		this.stop_rotation();
+		this.stop_zoom();
+		this.quit_fullpage();
+		console.log(this);
+		destroy_me = this;
+	};
+
+
+
 
 	//// GETTER AND SETTER
 		/**
-		 *  @description This function sets the image offsets to their values.<br>It is telling the Player how to transition between small and large images.
+		 *  @description This function sets image offsets.<br>
+		 *    The Player is able to work with a different amount of small and large images.<br>
+		 *    This function assigns image-ids to each other to be able to transition smoothly between small and large images.
 		 */
 		ThrixtyPlayer.MainClass.prototype.set_image_offsets = function(){
 			// get values
@@ -987,10 +1042,10 @@
 			}
 		};
 		/**
-		 *  @description This function sets the base frequencies of the image objects.<br>The frequencies are different, when there are different amounts of images.
+		 *  @description This function sets the base frequencies of the image objects.<br>
+		 *    The frequencies are different, when there are different amounts of images.
 		 */
 		ThrixtyPlayer.MainClass.prototype.set_image_frequencies = function(){
-			// frequency
 			this.small.frequency = Math.ceil(this.small.images_count / this.settings.seconds_per_turn);
 			this.large.frequency = Math.ceil(this.large.images_count / this.settings.seconds_per_turn);
 		};
@@ -999,11 +1054,11 @@
 		 *  @param {String} direction "default", "fw" or "bw"
 		 */
 		ThrixtyPlayer.MainClass.prototype.set_rotation_direction = function(direction){
-			if( "default" == direction ){
+			if( direction == "default" ){
 				this.rotation_direction = this.settings.direction;
-			} else if( "fw" == direction || 1 == direction ){
+			} else if( direction == "fw" || direction == 1 ){
 				this.rotation_direction = 1; // current direction: forward
-			} else if( "bw" == direction || -1 == direction ){
+			} else if( direction == "bw" || direction == -1 ){
 				this.rotation_direction = -1; // current direction: backward
 			}
 		};
@@ -1012,7 +1067,7 @@
 		 *  @return {DOM} image Returns the small image which the active_image_id is pointing to.
 		 */
 		ThrixtyPlayer.MainClass.prototype.get_current_small_image = function(){
-			// get and return the small image
+			// get and return the current small image
 			return this.small.images[this.small.active_image_id].jq_elem[0];
 		};
 		/**
@@ -1025,17 +1080,33 @@
 			var base_large = this.large.images[this.large.active_image_id];
 
 			// if the large one is already loaded, return it
-			if( true === base_large.elem_loaded ){
+			if( base_large.elem_loaded === true ){
 				return base_large.jq_elem[0];
 			}
 
 			// request the large picture, that should have been loaded now
-			if( null === base_large.elem_loaded ){
-				this.load_one_image(this.large.images[this.large.active_image_id], this.image_cache_large);
+			if( base_large.elem_loaded === null ){
+				this.load_one_image(this.large.images[this.large.active_image_id], this.DOM_obj.image_cache_large);
 			}
 
 			// the large one isnt yet loaded, so fall back to the small one
 			return base_small.jq_elem[0];
+		};
+		/**
+		 *  @description This function returns the dimensions of the background canvas
+		 *  @return {Object} Collection of offset-x, offset-y, width, height and drawing-context
+		 */
+		ThrixtyPlayer.MainClass.prototype.get_bg_canvas_dimensions = function(){
+			return {
+				self: this.DOM_obj.bg_canvas,
+				ctx: this.DOM_obj.bg_canvas[0].getContext("2d"),
+				x: this.DOM_obj.bg_canvas.offset().left,
+				y: this.DOM_obj.bg_canvas.offset().top,
+				draw_w: this.DOM_obj.bg_canvas[0].width,
+				draw_h: this.DOM_obj.bg_canvas[0].height,
+				vp_w: this.DOM_obj.bg_canvas.width(),
+				vp_h: this.DOM_obj.bg_canvas.height(),
+			}
 		};
 		/**
 		 *  @description This function returns the dimensions of the main canvas
@@ -1043,11 +1114,30 @@
 		 */
 		ThrixtyPlayer.MainClass.prototype.get_main_canvas_dimensions = function(){
 			return {
-				x: this.main_canvas.offset().left,
-				y: this.main_canvas.offset().top,
-				w: this.main_canvas.width(),
-				h: this.main_canvas.height(),
-				context: this.main_canvas[0].getContext("2d"),
+				self: this.DOM_obj.main_canvas,
+				ctx: this.DOM_obj.main_canvas[0].getContext("2d"),
+				x: this.DOM_obj.main_canvas.offset().left,
+				y: this.DOM_obj.main_canvas.offset().top,
+				draw_w: this.DOM_obj.main_canvas[0].width,
+				draw_h: this.DOM_obj.main_canvas[0].height,
+				vp_w: this.DOM_obj.main_canvas.width(),
+				vp_h: this.DOM_obj.main_canvas.height(),
+			}
+		};
+		/**
+		 *  @description This function returns the dimensions of the minimap canvas
+		 *  @return {Object} Collection of offset-x, offset-y, width, height and drawing-context
+		 */
+		ThrixtyPlayer.MainClass.prototype.get_minimap_canvas_dimensions = function(){
+			return {
+				self: this.DOM_obj.minimap_canvas,
+				ctx: this.DOM_obj.minimap_canvas[0].getContext("2d"),
+				x: this.DOM_obj.minimap_canvas.offset().left,
+				y: this.DOM_obj.minimap_canvas.offset().top,
+				draw_w: this.DOM_obj.minimap_canvas[0].width,
+				draw_h: this.DOM_obj.minimap_canvas[0].height,
+				vp_w: this.DOM_obj.minimap_canvas.width(),
+				vp_h: this.DOM_obj.minimap_canvas.height(),
 			}
 		};
 		/**
@@ -1056,15 +1146,17 @@
 		 */
 		ThrixtyPlayer.MainClass.prototype.get_zoom_canvas_dimensions = function(){
 			return {
-				x: this.zoom_box.offset().left,
-				y: this.zoom_box.offset().top,
-				w: this.zoom_box.width(),
-				h: this.zoom_box.height(),
-				context: this.zoom_box[0].getContext("2d"),
+				self: this.DOM_obj.zoom_canvas,
+				ctx: this.DOM_obj.zoom_canvas[0].getContext("2d"),
+				x: this.DOM_obj.zoom_canvas.offset().left,
+				y: this.DOM_obj.zoom_canvas.offset().top,
+				draw_w: this.DOM_obj.zoom_canvas[0].width,
+				draw_h: this.DOM_obj.zoom_canvas[0].height,
+				vp_w: this.DOM_obj.zoom_canvas.width(),
+				vp_h: this.DOM_obj.zoom_canvas.height(),
 			}
 		};
 	// /GETTER AND SETTER END
 
 
 })(jQuery_2_1_3);
-/* /thrixty_main_class.js */

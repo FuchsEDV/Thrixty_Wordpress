@@ -1,34 +1,39 @@
 jQuery(document).ready(function(){
-	// integrate the Generator Button.
-	tinymce.create("tinymce.plugins.thrixty_gen", {
-		init: function(ed, url){
-			if( generate_dialog(ed) ){
-				ed.addButton("thrixty", {
-					title: "Thrixty Player Shortcode Generator",
-					image: url+"/generator_icon.png",
-					onclick: function(){
-						button_click_event(ed);
-					}
-				});
-			} else {
-				throw new Error("The ThrixtyPlugin failed to deliver a proper JSON parameter string. Please check your Browsers JSON decode Compatibility and the option \"thrixty_options\".", "", "");
+	//// integrate the Generator Button.
+		tinymce.create("tinymce.plugins.thrixty_gen", {
+			init: function(ed, url){
+				if( generate_dialog(ed) ){
+					ed.addButton("thrixty", {
+						title: "Thrixty Player Shortcode Generator",
+						image: url+"/generator_icon.png",
+						onclick: function(){
+							overlay.show();
+						}
+					});
+				} else {
+					throw new Error("The ThrixtyPlugin failed to deliver a proper JSON parameter string. Please check your Browsers JSON decode Compatibility and the option \"thrixty_options\".", "", "");
+				}
+			},
+			createControl: function(b,a){
+				return null
 			}
-		},
-		createControl: function(b,a){
-			return null
-		}
-	});
-	tinymce.PluginManager.add(
-		"thrixty",
-		tinymce.plugins.thrixty_gen
-	);
+		});
+		tinymce.PluginManager.add(
+			"thrixty",
+			tinymce.plugins.thrixty_gen
+		);
+	//// /
 
+	// the overlay as root object needs to be known to all functions -> document-wide scope
 	var overlay;
 	function generate_dialog(tinymce_obj){
 		// check for variable set by plugin
 		if( typeof(thrixty_sc_gen_var) !== 'undefined' ){
+			// create a gray overlay over the entire page
 			overlay = jQuery('<div id="generator_dialog" style="display:none; box-sizing:border-box; position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(0,0,0,0.5); z-index:9999;       padding:50px 0;"></div>');
 			jQuery("body").append(overlay);
+				// generator dialog container - in the middle of the dialog
+				// todo: vertical center -> use three divs "outer", "middle" and "inner" -> middle one gets "vertical-align: center;"
 				var gen_container = jQuery('<div style="box-sizing:border-box; margin:auto; width:600px; background:white; border:3px solid #555555; padding: 15px;"></div>');
 				overlay.append(gen_container);
 				var styles_text = "<style>";
@@ -61,42 +66,45 @@ jQuery(document).ready(function(){
 							stuff += "<td><label for='zoom_mode'>zoom_mode</label></td>";
 							stuff += "<td>";
 								stuff += "<select id='zoom_mode' name='zoom_mode'>";
-									// Possible Inbox Zoom
-									stuff += "<option value='inbox' ";
-										if( "inbox" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected ";
-										}
-										stuff += "selected>Inbox</option>";
-									// Possible Inbox Zoom with Minimap
-									stuff += "<option value='inbox_minimap' ";
-										if( "inbox_minimap" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected";
-										}
-										stuff += ">Inbox mit Minimap</option>";
-									// Possible Outbox Zoom on the Right
-									stuff += "<option value='outbox_right' ";
-										if( "outbox_right" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected";
-										}
-										stuff += ">Outbox Rechts</option>";
-									// Possible Outbox Zoom on the Left
-									stuff += "<option value='outbox_left' ";
-										if( "outbox_left" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected";
-										}
-										stuff += ">Outbox links</option>";
-									// Possible Outbox Zoom at the Top
-									stuff += "<option value='outbox_top' ";
-										if( "outbox_top" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected";
-										}
-										stuff += ">Outbox Oben</option>";
-									// Possible Outbox Zoom at the Bottom
-									stuff += "<option value='outbox_bottom' ";
-										if( "outbox_bottom" === thrixty_sc_gen_var.zoom_mode ){
-											stuff += "selected";
-										}
-										stuff += ">Outbox Unten</option>";
+									// stuff += "<option value='' selected>"+thrixty_sc_gen_var.zoom_mode+"</option>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='inbox'>Inbox</option>";
+									stuff += "<option value='outbox'>Outbox</option>";
+								stuff += "</select>";
+							stuff += "</td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
+							stuff += "<td><label for='zoom_control'>zoom_control</label></td>";
+							stuff += "<td>";
+								stuff += "<select id='zoom_control' name='zoom_control'>";
+									// stuff += "<option value='' selected>"+thrixty_sc_gen_var.zoom_control+"</option>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='progressive' >Progressive</option>";
+									stuff += "<option value='classic'>Classic</option>";
+								stuff += "</select>";
+							stuff += "</td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
+							stuff += "<td><label for='position_indicator'>position_indicator</label></td>";
+							stuff += "<td>";
+								stuff += "<select id='position_indicator' name='position_indicator'>";
+									// stuff += "<option value='' selected>"+thrixty_sc_gen_var.position_indicator+"</option>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='minimap'>Minimap</option>";
+									stuff += "<option value='marker'>Marker</option>";
+								stuff += "</select>";
+							stuff += "</td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
+							stuff += "<td><label for='outbox_position'>outbox_position</label></td>";
+							stuff += "<td>";
+								stuff += "<select id='outbox_position' name='outbox_position'>";
+									// stuff += "<option value='' selected>"+thrixty_sc_gen_var.outbox_position+"</option>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='right'>Right</option>";
+									stuff += "<option value='bottom'>Bottom</option>";
+									stuff += "<option value='left'>Left</option>";
+									stuff += "<option value='top'>Top</option>";
 								stuff += "</select>";
 							stuff += "</td>";
 						stuff += "</tr>";
@@ -112,16 +120,10 @@ jQuery(document).ready(function(){
 							stuff += "<td><label for='direction'>direction</label></td>";
 							stuff += "<td>";
 								stuff += "<select id='direction' name='direction'>";
-									if( "forward" === thrixty_sc_gen_var.direction ){
-										stuff += "<option value='forward' selected>Vorwaerts</option>";
-									} else {
-										stuff += "<option value='forward'>Vorwaerts</option>";
-									}
-									if( "backward" === thrixty_sc_gen_var.direction ){
-										stuff += "<option value='backward' selected>Rueckwaerts</option>";
-									} else {
-										stuff += "<option value='backward'>Rueckwaerts</option>";
-									}
+									// stuff += "<option value='' selected>"+thrixty_sc_gen_var.direction+"</option>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='forward'>Forward</option>";
+									stuff += "<option value='backward'>Backward</option>";
 								stuff += "</select>";
 							stuff += "</td>";
 						stuff += "</tr>";
@@ -135,7 +137,10 @@ jQuery(document).ready(function(){
 				gen_container.append(jQuery(stuff));
 			gen_container.find("#ok").on(
 				"click",
-				function(){
+				function(e){
+					// do not submit this form
+					e.preventDefault();
+
 					// send
 					var elem = jQuery('#thrixty_generator_form')[0];
 
@@ -145,50 +150,56 @@ jQuery(document).ready(function(){
 						var current_elem = elem[i];
 						switch( current_elem.name ){
 							case "basepath":
-								if( "" != current_elem.value ){
+								if( current_elem.value != "" ){
 									content += "basepath=\""+current_elem.value+"\" ";
-								} else if( "" == thrixty_sc_gen_var.basepath ){
-									content += "basepath=\"|BASEPATH|\" ";
 								}
 								break;
 							case "filelist_path_small":
-								if( "" != current_elem.value ){
+								if( current_elem.value != "" ){
 									content += "filelist_path_small=\""+current_elem.value+"\" ";
 								} else {
 									content += "filelist_path_small=\"|SMALL FILELIST|\" ";
 								}
 								break;
 							case "filelist_path_large":
-								if( "" != current_elem.value ){
+								if( current_elem.value != "" ){
 									content += "filelist_path_large=\""+current_elem.value+"\" ";
 								} else {
 									content += "filelist_path_large=\"|LARGE FILELIST|\" ";
 								}
 								break;
 							case "zoom_mode":
-								var cur_val = current_elem[current_elem.selectedIndex].value;
-								if( cur_val != thrixty_sc_gen_var.zoom_mode ){
+								if( current_elem.value != "" ){
 									content += "zoom_mode=\""+current_elem.value+"\" ";
 								}
 								break;
+							case "zoom_control":
+								if( current_elem.value != "" ){
+									content += "zoom_control=\""+current_elem.value+"\" ";
+								}
+								break;
+							case "position_indicator":
+								if( current_elem.value != "" ){
+									content += "position_indicator=\""+current_elem.value+"\" ";
+								}
+								break;
+							case "outbox_position":
+								if( current_elem.value != "" ){
+									content += "outbox_position=\""+current_elem.value+"\" ";
+								}
+								break;
 							case "seconds_per_turn":
-							console.log("seconds per turn execute");
-								if( "" != current_elem.value ){
+								if( current_elem.value != "" ){
 									content += "seconds_per_turn=\""+current_elem.value+"\" ";
-								} else if( "" == thrixty_sc_gen_var.seconds_per_turn ){
-									content += "seconds_per_turn=\"[SECONDS PER TURN]\" ";
 								}
 								break;
 							case "sensitivity_x":
-								if( "" != current_elem.value ){
+								if( current_elem.value != "" ){
 									content += "sensitivity_x=\""+current_elem.value+"\" ";
-								} else if( "" == thrixty_sc_gen_var.sensitivity_x ){
-									content += "sensitivity_x=\"[SENSITIVITY X]\" ";
 								}
 								break;
 							case "direction":
-								var cur_val = current_elem[current_elem.selectedIndex].value;
-								if( cur_val != thrixty_sc_gen_var.direction ){
+								if( current_elem.value != "" ){
 									content += "direction=\""+current_elem.value+"\" ";
 								}
 								break;
@@ -199,13 +210,13 @@ jQuery(document).ready(function(){
 					}
 					content += "]";
 					tinymce_obj.selection.setContent(content);
-					close_dialog();
+					overlay.hide();
 				}
 			);
 			gen_container.find("#close").on(
 				"click",
 				function(){
-					close_dialog();
+					overlay.hide();
 				}
 			);
 			// alles erfolgreich?
@@ -215,13 +226,5 @@ jQuery(document).ready(function(){
 			return false;
 		}
 	}
-	function open_dialog(){
-		overlay.show();
-	}
-	function close_dialog(){
-		overlay.hide();
-	}
-	function button_click_event(tinymce_obj){
-		open_dialog();
-	}
+
 });

@@ -7,7 +7,8 @@ ToC:
 * 3.: Installation
 * 4.: Usage
 * 5.: Change Log
-* 6.: License
+* 6.: Planned Features and Changes
+* 7.: License
 
 ### 1.) Thrixty Player for Wordpress
 This Wordpress plugin is using shortcodes to generate content fit for use with the Thrixty Player.
@@ -51,13 +52,16 @@ If you need some example files, download the "example"-folder from [here](https:
 [ESC] => Stop Zoom, Rotation, Fullscreen all at once.
 ```
 
-###5.) Change Log
+### 5.) Change Log
 * V1.0 (Release):
     * Automatic embedding of base files
     * Shortcode Generator
     * Central Settings
 
-###6.) License
+### 6.) Planned Features and Changes
+* Change the setting fields to textfield and radiobutton respectively.
+
+### 7.) License
 ```txt
 Thrixty Player for Wordpress Copyright (C) 2015  F.Heitmann @ Fuchs EDV GmbH for 360Shots
 
