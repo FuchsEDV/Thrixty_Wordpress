@@ -100,7 +100,12 @@
 	}
 	// These functions belong to the admin init...
 		function thrixty_options_section(){
-			?><b>Bitte lesen Sie die <a href="#pageinfo">Seiteninformationen</a> und die <a href="#paraminfo">Parametererklärungen</a>, bevor Sie hier Einstellungen vornehmen!</b><?php
+		?>
+			<b>Bitte lesen Sie die <a href="#pageinfo">Seiteninformationen</a> und die <a href="#paraminfo">Parametererkl&auml;rungen</a>, bevor Sie hier Einstellungen vornehmen!</b>
+			<p>
+				Nicht gef&uuml;llte Felder greifen auf die Standardwerte des Thrixtyplayers selbst zurück.
+			</p>
+		<?php
 		}
 		function thrixty_options_basepath() {
 			$options = get_option('thrixty_options');
@@ -462,7 +467,7 @@
 			?>
 			<div class="wrap">
 				<h2>Thrixty Player - Allgemeine Einstellungen</h2>
-				<p>Hier können Sie allgemeine Standardwerte festlegen.</p>
+				<p>Hier k&ouml;nnen Sie allgemeine Standardwerte festlegen.</p>
 				<form action="options.php" method="post">
 					<?php settings_fields('thrixty_options'); ?>
 					<?php do_settings_sections('thrixty_options_page'); ?>
@@ -473,16 +478,16 @@
 				<hr>
 				<h3 id="pageinfo">Seiteninformationen</h3>
 				<p>
-					Über den "3D" Button im Artikel Editor (visuell) können Sie einen Shortcode generieren.<br>
-					Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>überschreiben</i></b> die allgemeinen Einstellungen, die sie hier tätigen.<br>
-					Die allgemeinen Einstellungen sind dafür gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
+					&Uuml;ber den "3D" Button im Artikel Editor (visuell) k&ouml;nnen Sie einen Shortcode generieren.<br>
+					Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>&uuml;berschreiben</i></b> die allgemeinen Einstellungen, die sie hier t&auml;tigen.<br>
+					Die allgemeinen Einstellungen sind daf&uuml;r gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
 				</p>
 				<p>
-					Wenn es für eine Option keinen allgemeingültigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
+					Wenn es f&uuml;r eine Option keinen allgemeing&uuml;ltigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
 					Dies wird mit den beiden Optionen <b>thrixtyplayer-filelist-path-small</b> und <b>thrixtyplayer-filelist-path-large</b> immer passieren!<br>
 				</p>
 				<p>
-					Die allgemeinen Einstellungen sind vor allem dann hilfreich, wenn alle Ihre für den Player benötigten Listen im selben Grundordner liegen (empfohlen).<br>
+					Die allgemeinen Einstellungen sind vor allem dann hilfreich, wenn alle Ihre f&uuml;r den Player ben&ouml;tigten Listen im selben Grundordner liegen (empfohlen).<br>
 				</p>
 				<br>
 				<p>
@@ -494,14 +499,14 @@
 				</p>
 				<br>
 				<hr>
-				<h3 id="paraminfo">Erklärung der Parameter und ihrer Werte</h3>
+				<h3 id="paraminfo">Erkl&auml;rung der Parameter und ihrer Werte</h3>
 				<p>
 					<b>Basepath:</b><br>
 					Dies ist der Grundpfad, von dem aus nach den beiden Filelists gesucht wird.<br>
 					Beispiel: <b>http://example.com/360_pictures/</b>[filelist-paths]<br>
-					Für diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
+					F&uuml;r diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
 					<b>"__SITE__"</b>: Verweist auf die URL der Startseite.<br>
-					<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch für die Ressourcen benutzt wird.<br>
+					<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch f&uuml;r die Ressourcen benutzt wird.<br>
 					<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird.<br>
 					<?php if( isset($box3d_options["path"]) ){ ?>
 						Der alte Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
@@ -509,33 +514,33 @@
 				</p>
 				<p>
 					<b>Zoom Mode</b><br>
-					Hier kann die Zoom Art gewählt werden.<br>
-					Der Inbox-Zoom zoomt das Bild direkt grö&szlig;er.<br>
+					Hier kann die Zoom Art gew&auml;hlt werden.<br>
+					Der Inbox-Zoom zoomt das Bild direkt gr&ouml;&szlig;er.<br>
 					Der Outbox-Zoom erzeugt dagegen ein extra Fenster.<br>
-					(Im Fullscreen wird aus dem Outbox vorrübergehend in den normalen Inbox-Zoom gewechselt!)<br>
-					Mögliche Werte:<br>
+					(Im Fullscreen wird aus dem Outbox vorr&uuml;bergehend in den normalen Inbox-Zoom gewechselt!)<br>
+					M&ouml;gliche Werte:<br>
 					<b>inbox</b>, outbox<br>
 				</p>
 				<p>
 					<b>Outbox Position</b><br>
-					Wenn der Outbox Zoom verwendet wird, kann hier gewählt werden, wo das Fenster auftauchen soll.<br>
-					Mögliche Werte:<br>
+					Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
+					M&ouml;gliche Werte:<br>
 					<b>right</b>, bottom, left, top<br>
 				</p>
 				<p>
 					<b>Positions Anzeiger</b><br>
-					Damit man sich in dem vergrößerten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
+					Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
 					Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
 					Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
-					Mögliche Werte:<br>
+					M&ouml;gliche Werte:<br>
 					<b>minimap</b>, marker, none<br>
 				</p>
 				<p>
 					<b>Zoom Steuerung</b><br>
-					Hier wird eingestellt, wie der Kunde sich in dem vergrößerten Bild bewegen kann.<br>
+					Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
 					Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
 					Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
-					Mögliche Werte:<br>
+					M&ouml;gliche Werte:<br>
 					<b>progressive</b>, classic<br>
 				</p>
 
@@ -544,15 +549,15 @@
 
 				<p>
 					<b>Seconds per Turn</b><br>
-					Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte für alle Objekte gleich sein, um Gleichmäßigkeit über die ganze Seite zu gewährleisten.<br>
-					Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden für eine komplette Drehung<br>
+					Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte f&uuml;r alle Objekte gleich sein, um Gleichm&auml;&szlig;igkeit &uuml;ber die ganze Seite zu gew&auml;hrleisten.<br>
+					Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden f&uuml;r eine komplette Drehung<br>
 					<?php if( isset($box3d_options["framerate"]) ){ ?>
 						<td><?php echo (72 / $box3d_options["framerate"]); ?></td>
 					<? } ?>
 				</p>
 				<p>
 					<b>Sensitivity X</b><br>
-					Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste zählt.<br>
+					Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste z&auml;hlt.<br>
 					Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
 					Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
 				</p>
@@ -572,7 +577,7 @@
 				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
 				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
 					<p>
-						Fuer den Fall, dass Sie vorher Box3D verwendet haben, können Sie hier automatisch Box3D Shortcodes in Thrixty Shortcodes übersetzen lassen.<br>
+						Fuer den Fall, dass Sie vorher Box3D verwendet haben, k&ouml;nnen Sie hier automatisch Box3D Shortcodes in Thrixty Shortcodes &uuml;bersetzen lassen.<br>
 						Bitte bedenken Sie dabei, dass es einige Funktionen nicht mehr gibt oder auch neue dazu gekommen sind.<br>
 						Die Filelists selber werden NICHT kontrolliert!<br>
 						<br>
@@ -582,7 +587,7 @@
 						Geben Sie entweder "all" an, um alle Posts und Pages nach dem alten Shortcode durchsuchen zu lassen, oder eine komma-getrennte Liste mit den entsprechenden IDs.<br>
 						<input name="post_ids" type="text" placeholder="Post IDs or 'all'" />
 						<input name="Submit" type="submit" value="Start Box3D to Thrixty Conversion" /><br>
-						<i><b>ACHTUNG! Dies kann nur per Hand rückgängig gemacht werden!</b></i><br>
+						<i><b>ACHTUNG! Dies kann nur per Hand r&uuml;ckg&auml;ngig gemacht werden!</b></i><br>
 					</p>
 				</form>
 			</div><?php
