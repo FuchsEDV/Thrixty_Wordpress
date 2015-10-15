@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player
+	 * Plugin Name: Thrixty Player v1.4dev
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 1.3dev
+	 * Version: 1.4dev
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 1.3dev
+	 * @version 1.4dev
 	 */
 
 
@@ -37,13 +37,13 @@
 				"thrixty_options",
 				array(
 					"basepath" => "__PLUGIN__/objects/",
-					"zoom_mode" => "inbox",
 					"zoom_control" => "progressive",
+					"zoom_mode" => "inbox",
 					"position_indicator" => "minimap",
 					"outbox_position" => "right",
+					"direction" => "forward",
 					"seconds_per_turn" => "5",
 					"sensitivity_x" => "20",
-					"direction" => "forward",
 				)
 			);
 		}
@@ -90,13 +90,13 @@
 
 		add_settings_section('thrixty_settings_section', 'Thrixty Player Einstellungen', 'thrixty_options_section', 'thrixty_options_page');
 			add_settings_field('plugin_basepath', 'Basepath', 'thrixty_options_basepath', 'thrixty_options_page', 'thrixty_settings_section');
-			add_settings_field('plugin_zoom_mode', 'Zoom Mode', 'thrixty_options_zoom_mode', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_zoom_control', 'Zoom Control', 'thrixty_options_zoom_control', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_zoom_mode', 'Zoom Mode', 'thrixty_options_zoom_mode', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_position_indicator', 'Position Indicator', 'thrixty_options_position_indicator', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_outbox_position', 'Outbox Position', 'thrixty_options_outbox_position', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_direction', 'Direction', 'thrixty_options_direction', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_seconds_per_turn', 'Seconds per Turn', 'thrixty_options_seconds_per_turn', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_sensitivity_x', 'Sensitivity X', 'thrixty_options_sensitivity_x', 'thrixty_options_page', 'thrixty_settings_section');
-			add_settings_field('plugin_direction', 'Direction', 'thrixty_options_direction', 'thrixty_options_page', 'thrixty_settings_section');
 	}
 	// These functions belong to the admin init...
 		function thrixty_options_section(){
@@ -111,25 +111,13 @@
 			$options = get_option('thrixty_options');
 			echo "<input id='plugin_basepath' name='thrixty_options[basepath]' size='40' type='text' value='{$options['basepath']}' />";
 		}
-		function thrixty_options_seconds_per_turn() {
+		function thrixty_options_zoom_control() {
 			$options = get_option('thrixty_options');
-			echo "<input id='plugin_seconds_per_turn' name='thrixty_options[seconds_per_turn]' size='40' type='text' value='{$options['seconds_per_turn']}' />";
-		}
-		function thrixty_options_direction() {
-			$options = get_option('thrixty_options');
-			echo "<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' value='{$options['direction']}' />";
-		}
-		function thrixty_options_sensitivity_x() {
-			$options = get_option('thrixty_options');
-			echo "<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' value='{$options['sensitivity_x']}' />";
+			echo "<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' value='{$options['zoom_control']}' />";
 		}
 		function thrixty_options_zoom_mode() {
 			$options = get_option('thrixty_options');
 			echo "<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' value='{$options['zoom_mode']}' />";
-		}
-		function thrixty_options_zoom_control() {
-			$options = get_option('thrixty_options');
-			echo "<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' value='{$options['zoom_control']}' />";
 		}
 		function thrixty_options_position_indicator() {
 			$options = get_option('thrixty_options');
@@ -138,6 +126,18 @@
 		function thrixty_options_outbox_position() {
 			$options = get_option('thrixty_options');
 			echo "<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' value='{$options['outbox_position']}' />";
+		}
+		function thrixty_options_direction() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' value='{$options['direction']}' />";
+		}
+		function thrixty_options_seconds_per_turn() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_seconds_per_turn' name='thrixty_options[seconds_per_turn]' size='40' type='text' value='{$options['seconds_per_turn']}' />";
+		}
+		function thrixty_options_sensitivity_x() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' value='{$options['sensitivity_x']}' />";
 		}
 	// /
 
@@ -160,9 +160,9 @@
 		// This global is counting the number of initialized Players.
 		$player_counter = 0;
 		// JS
-		wp_enqueue_script('thrixty_init', plugins_url("thrixty_base/scripts/thrixty_initialize.js", __FILE__));
+		wp_enqueue_script('thrixty_init', plugins_url("thrixty_base/thrixty_init.js", __FILE__));
 		// CSS
-		wp_enqueue_style('thrixty_css', plugins_url("thrixty_base/style/thrixty_styles.css", __FILE__));
+		// wp_enqueue_style('thrixty_css', plugins_url("custom.css", __FILE__));
 	}
 
 	/**
@@ -207,13 +207,13 @@
 							"basepath" => $thrixty_options["basepath"],
 							"filelist_path_small" => "",
 							"filelist_path_large" => "",
-							"zoom_mode" => $thrixty_options["zoom_mode"],
 							"zoom_control" => $thrixty_options["zoom_control"],
+							"zoom_mode" => $thrixty_options["zoom_mode"],
 							"position_indicator" => $thrixty_options["position_indicator"],
 							"outbox_position" => $thrixty_options["outbox_position"],
+							"direction" => $thrixty_options["direction"],
 							"seconds_per_turn" => $thrixty_options["seconds_per_turn"],
 							"sensitivity_x" => $thrixty_options["sensitivity_x"],
-							"direction" => $thrixty_options["direction"],
 						);
 						// JSON en- and de-coding to translate PHP hash into JS object
 						?><script>
@@ -259,7 +259,7 @@
 
 		// Integrate options into the div_attributes array.
 		$thrixty_options = get_option("thrixty_options");
-		$thrixty_options_whitelist = array("basepath", "direction", "outbox_position", "position_indicator", "seconds_per_turn", "sensitivity_x", "zoom_control", "zoom_mode");
+		$thrixty_options_whitelist = array("basepath", "zoom_control", "zoom_mode",	"position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x");
 		foreach( $thrixty_options_whitelist as $key ){
 			if( isset($thrixty_options[$key]) && $thrixty_options[$key] != "" ){
 				$div_attributes[$key] = $thrixty_options[$key];
@@ -269,7 +269,7 @@
 
 		// Integrate shortcode attributes into the combined div_attributes/options array.
 		$shortcode_attributes = $atts;
-		$shortcode_attributes_whitelist = array("basepath", "direction", "filelist_path_small", "filelist_path_large", "outbox_position", "position_indicator", "seconds_per_turn", "sensitivity_x", "zoom_control", "zoom_mode");
+		$shortcode_attributes_whitelist = array("basepath", "filelist_path_small", "filelist_path_large", "zoom_control", "zoom_mode", "position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x");
 		foreach( $shortcode_attributes_whitelist as $key ){
 			if( isset($shortcode_attributes[$key]) && $shortcode_attributes[$key] != "" ){
 				$div_attributes[$key] = $shortcode_attributes[$key];
@@ -289,15 +289,15 @@
 					$value = str_replace("__SITE__", get_site_url(), $value);
 					$value = trailingslashit($value);
 				// intended Fallthrough
-				case "zoom_mode":
-				case "zoom_control":
-				case "position_indicator":
-				case "outbox_position":
-				case "seconds_per_turn":
-				case "sensitivity_x":
-				case "direction":
 				case "filelist_path_small":
 				case "filelist_path_large":
+				case "zoom_control":
+				case "zoom_mode":
+				case "position_indicator":
+				case "outbox_position":
+				case "direction":
+				case "seconds_per_turn":
+				case "sensitivity_x":
 					// always prepend
 					$returning .= "thrixty-";
 
@@ -513,6 +513,14 @@
 					<? } ?>
 				</p>
 				<p>
+					<b>Zoom Steuerung</b><br>
+					Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
+					Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
+					Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
+					M&ouml;gliche Werte:<br>
+					<b>progressive</b>, classic<br>
+				</p>
+				<p>
 					<b>Zoom Mode</b><br>
 					Hier kann die Zoom Art gew&auml;hlt werden.<br>
 					Der Inbox-Zoom zoomt das Bild direkt gr&ouml;&szlig;er.<br>
@@ -520,12 +528,6 @@
 					(Im Fullscreen wird aus dem Outbox vorr&uuml;bergehend in den normalen Inbox-Zoom gewechselt!)<br>
 					M&ouml;gliche Werte:<br>
 					<b>inbox</b>, outbox<br>
-				</p>
-				<p>
-					<b>Outbox Position</b><br>
-					Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
-					M&ouml;gliche Werte:<br>
-					<b>right</b>, bottom, left, top<br>
 				</p>
 				<p>
 					<b>Positions Anzeiger</b><br>
@@ -536,17 +538,22 @@
 					<b>minimap</b>, marker, none<br>
 				</p>
 				<p>
-					<b>Zoom Steuerung</b><br>
-					Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
-					Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
-					Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
+					<b>Outbox Position</b><br>
+					Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
 					M&ouml;gliche Werte:<br>
-					<b>progressive</b>, classic<br>
+					<b>right</b>, bottom, left, top<br>
 				</p>
-
-
-
-
+				<p>
+					<b>Direction</b><br>
+					Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
+					Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
+					Objekte, die sich gegen den Uhrzeigersinn drehen, werden "backward" drehend genannt.<br>
+					<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
+					Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
+					<?php if( isset($box3d_options["direction"]) ){ ?>
+						Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
+					<? } ?>
+				</p>
 				<p>
 					<b>Seconds per Turn</b><br>
 					Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte f&uuml;r alle Objekte gleich sein, um Gleichm&auml;&szlig;igkeit &uuml;ber die ganze Seite zu gew&auml;hrleisten.<br>
@@ -560,17 +567,6 @@
 					Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste z&auml;hlt.<br>
 					Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
 					Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
-				</p>
-				<p>
-					<b>Direction</b><br>
-					Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
-					Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
-					Objekte, die sich gegen den Uhrzeigersinn drehen, werden "backward" drehend genannt.<br>
-					<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
-					Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
-					<?php if( isset($box3d_options["direction"]) ){ ?>
-						Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
-					<? } ?>
 				</p>
 				<br>
 				<hr>
