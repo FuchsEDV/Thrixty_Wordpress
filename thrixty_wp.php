@@ -1,19 +1,18 @@
 <?php
 	/**
-	 *
-	 * Plugin Name: Thrixty Player v1.4
+	 * Plugin Name: Thrixty Player 1.5.1
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 1.4
+	 * Version: 1.5.1
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 1.4
+	 * @version 1.5.1
 	 */
 
 
@@ -45,6 +44,7 @@
 					"direction" => "forward",
 					"seconds_per_turn" => "5",
 					"sensitivity_x" => "20",
+					"autoplay" => "first",
 				)
 			);
 		}
@@ -98,6 +98,7 @@
 			add_settings_field('plugin_direction', 'Direction', 'thrixty_options_direction', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_seconds_per_turn', 'Seconds per Turn', 'thrixty_options_seconds_per_turn', 'thrixty_options_page', 'thrixty_settings_section');
 			add_settings_field('plugin_sensitivity_x', 'Sensitivity X', 'thrixty_options_sensitivity_x', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_autoplay', 'Autoplay', 'thrixty_options_autoplay', 'thrixty_options_page', 'thrixty_settings_section');
 	}
 	// These functions belong to the admin init...
 		function thrixty_options_section(){
@@ -139,6 +140,10 @@
 		function thrixty_options_sensitivity_x() {
 			$options = get_option('thrixty_options');
 			echo "<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' value='{$options['sensitivity_x']}' />";
+		}
+		function thrixty_options_autoplay() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' value='{$options['autoplay']}' />";
 		}
 	// /
 
@@ -215,6 +220,7 @@
 							"direction" => $thrixty_options["direction"],
 							"seconds_per_turn" => $thrixty_options["seconds_per_turn"],
 							"sensitivity_x" => $thrixty_options["sensitivity_x"],
+							"autoplay" => $thrixty_options["autoplay"],
 						);
 						// JSON en- and de-coding to translate PHP hash into JS object
 						?><script>
@@ -244,77 +250,98 @@
 	 */
 	add_shortcode("thrixty", "thrixty_shortcode_handler");
 	function thrixty_shortcode_handler($atts){
-		global $player_counter;
-		// This global is counting the number of initialized Players.
+		global $player_counter; // This global is counting the number of initialized Players.
 
-		// attributes, that will be given to the generated div.
-		//   and their values, if not overridden.
-		$div_attributes = array(
-			"id" => "thrixty_box_$player_counter", // this is, what the global counter is for
-			"class" => "thrixty-player",
-			"tabindex" => $player_counter, // this is, what the global counter is for
-			"filelist_path_small" => "",
-			"filelist_path_large" => "",
-		);
-
-
-		// Integrate options into the div_attributes array.
-		$thrixty_options = get_option("thrixty_options");
-		$thrixty_options_whitelist = array("basepath", "zoom_control", "zoom_mode",	"position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x");
-		foreach( $thrixty_options_whitelist as $key ){
-			if( isset($thrixty_options[$key]) && $thrixty_options[$key] != "" ){
-				$div_attributes[$key] = $thrixty_options[$key];
-			}
-		}
-
-
-		// Integrate shortcode attributes into the combined div_attributes/options array.
-		$shortcode_attributes = $atts;
-		$shortcode_attributes_whitelist = array("basepath", "filelist_path_small", "filelist_path_large", "zoom_control", "zoom_mode", "position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x");
-		foreach( $shortcode_attributes_whitelist as $key ){
-			if( isset($shortcode_attributes[$key]) && $shortcode_attributes[$key] != "" ){
-				$div_attributes[$key] = $shortcode_attributes[$key];
-			}
-		}
-
-
-		// Build the div
+		// Start building the div.
 		$returning = "<div ";
-		// convert $div_attributes to actual html attributes
-		foreach( $div_attributes as $key => $value ){
-			switch( $key ){
-				case "basepath":
-					$value = str_replace("__PLUGIN__", plugins_url("", __FILE__), $value);
-					$upload_dir = wp_upload_dir();
-					$value = str_replace("__UPLOAD__", $upload_dir["baseurl"], $value);
-					$value = str_replace("__SITE__", get_site_url(), $value);
-					$value = trailingslashit($value);
-				// intended Fallthrough
-				case "filelist_path_small":
-				case "filelist_path_large":
-				case "zoom_control":
-				case "zoom_mode":
-				case "position_indicator":
-				case "outbox_position":
-				case "direction":
-				case "seconds_per_turn":
-				case "sensitivity_x":
-					// always prepend
-					$returning .= "thrixty-";
+			$returning .= "id=\"thrixty_box_$player_counter\" "; // this is, what the global counter is for
+			$returning .= "class=\"thrixty-player\" ";
+			$returning .= "tabindex=\"$player_counter\" "; // this is, what the global counter is for
 
-				// intended Fallthrough
-				default:
-					// the shortcode cant stand hyphens...
-					// so translate the underscores back to hypens
-					$returning .= str_replace("_", "-", $key)."=\"$value\" ";
-					break;
+
+			// Wordpress's shortcodes cant stand hyphens...
+			// So we use underscores and later translate them back into hypens.
+
+			// Add MANDATORY values to the attributes.
+			$div_attributes = array(
+				"filelist_path_small" => "",
+				"filelist_path_large" => "",
+			);
+
+			// Add existing and non empty OPTIONS to attributes.
+			// They are not mandatory.
+			$thrixty_options = get_option("thrixty_options");
+			$thrixty_options_whitelist = array("basepath", "zoom_control", "zoom_mode",	"position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x", "autoplay");
+			foreach( $thrixty_options_whitelist as $key ){
+				if( isset($thrixty_options[$key]) && $thrixty_options[$key] != "" ){
+					$div_attributes[$key] = $thrixty_options[$key];
+				}
 			}
-		}
+
+			// Add existings and non empty SHORTCODE ATTRIBUTES to attributes.
+			// They are not mandatory either.
+			$shortcode_attributes = $atts;
+			$shortcode_attributes_whitelist = array("basepath", "filelist_path_small", "filelist_path_large", "zoom_control", "zoom_mode", "position_indicator", "outbox_position", "direction", "seconds_per_turn", "sensitivity_x", "autoplay");
+			foreach( $shortcode_attributes_whitelist as $key ){
+				if( isset($shortcode_attributes[$key]) && $shortcode_attributes[$key] != "" ){
+					$div_attributes[$key] = $shortcode_attributes[$key];
+				}
+			}
+
+
+			// Convert attributes array to actual HTML-attributes on the div.
+			foreach( $div_attributes as $key => $value ){
+				// always prepend.
+				$returning .= "thrixty-";
+
+				// Processing attributes.
+				switch( $key ){
+					case "basepath":
+						$value = str_replace("__PLUGIN__", plugins_url("", __FILE__), $value);
+						$upload_dir = wp_upload_dir();
+						$value = str_replace("__UPLOAD__", $upload_dir["baseurl"], $value);
+						$value = str_replace("__SITE__", get_site_url(), $value);
+						$value = trailingslashit($value);
+					break;
+					case "autoplay":
+						// DO AUTOPLAY STUFF
+						if( $value == "first" ){
+							// if value is first, use "on" for the first one only
+							//   the rest gets "off"
+							if( $player_counter === 0 ){
+								$value = "on";
+							} else {
+								$value = "off";
+							}
+						}else if( $value == "all_on" ){
+							// if value is "all_on", use "on"
+							$value = "on";
+						}else if( $value == "all_off" ){
+							// if value is "all_off", use "off"
+							$value = "off";
+						}
+					break;
+					case "filelist_path_small":
+					case "filelist_path_large":
+					case "zoom_control":
+					case "zoom_mode":
+					case "position_indicator":
+					case "outbox_position":
+					case "direction":
+					case "seconds_per_turn":
+					case "sensitivity_x":
+						// nothing
+					break;
+				}
+
+				// Translate the underscores back to hypens.
+				$returning .= str_replace("_", "-", $key)."=\"$value\" ";
+			}
+
+
+		// Close this div.
 		$returning .= "></div>";
-
-		// Increase the counter for initialized players.
-		$player_counter += 1;
-
+		$player_counter += 1; // Increase the counter for initialized players.
 		return $returning;
 	}
 
@@ -569,6 +596,12 @@
 					Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
 					Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
 				</p>
+				<p>
+					<b>Autoplay</b><br>
+					Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
+					M&ouml;gliche Werte:<br>
+					<b>first</b>, all_on, all_off<br>
+				</p>
 				<br>
 				<hr>
 				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
@@ -595,50 +628,51 @@
 
 
 
-// FOLGENDEN CODE NACH ENTWICKLUNG ENTFERNEN oder auskommentieren.
-// add_action( 'wp_print_scripts', 'disableAutoSave' );
-// function disableAutoSave(){
-// 	wp_deregister_script('autosave');
-// }
+	// Development Stuff
+	// just ignore :)
 
+	//// disables automatic saving of drafts
+	// add_action( 'wp_print_scripts', 'disableAutoSave' );
+	// function disableAutoSave(){
+	// 	wp_deregister_script('autosave');
+	// }
 
-// [shortcodefinder find="box3d"]
-// add_shortcode('shortcodefinder', 'wpb_find_shortcode');
-// function wpb_find_shortcode($atts, $content=null) {
-// 	ob_start();
-// 	extract(
-// 		shortcode_atts(
-// 			array(
-// 				'find' => '',
-// 			),
-// 			$atts
-// 		)
-// 	);
-// 	$string = $atts['find'];
-
-// 	$args = array(
-// 		's' => '['.$string,
-// 	);
-
-// 	$the_query = new WP_Query( $args );
-
-// 	if ( $the_query->have_posts() ) {
-// 		echo '<ul>';
-// 		while ( $the_query->have_posts() ) {
-// 			$the_query->the_post();
-// 			echo "<li><a href='".the_permalink()."'>";
-// 				the_title();
-// 			echo "</a></li>";
-// 		}
-// 		echo '</ul>';
-// 	} else {
-// 		echo "Sorry no posts using Shortcode \"[".$string." ]\" found";
-// 	}
-
-// 	wp_reset_postdata();
-// 	return ob_get_clean();
-// }
-
-
+	//// shows all posts with a box3d shortcode
+	// [shortcodefinder find="box3d"]
+	// add_shortcode('shortcodefinder', 'wpb_find_shortcode');
+	// function wpb_find_shortcode($atts, $content=null) {
+	// 	ob_start();
+	// 	extract(
+	// 		shortcode_atts(
+	// 			array(
+	// 				'find' => '',
+	// 			),
+	// 			$atts
+	// 		)
+	// 	);
+	// 	$string = $atts['find'];
+	//
+	// 	$args = array(
+	// 		's' => '['.$string,
+	// 	);
+	//
+	// 	$the_query = new WP_Query( $args );
+	//
+	// 	if ( $the_query->have_posts() ) {
+	// 		echo '<ul>';
+	// 		while ( $the_query->have_posts() ) {
+	// 			$the_query->the_post();
+	// 			echo "<li><a href='".the_permalink()."'>";
+	// 				the_title();
+	// 			echo "</a></li>";
+	// 		}
+	// 		echo '</ul>';
+	// 	} else {
+	// 		echo "Sorry no posts using Shortcode \"[".$string." ]\" found";
+	// 	}
+	//
+	// 	wp_reset_postdata();
+	// 	return ob_get_clean();
+	// }
 
 ?>
