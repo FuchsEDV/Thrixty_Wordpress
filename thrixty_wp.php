@@ -1,5 +1,6 @@
 <?php
 	/**
+	 *
 	 * Plugin Name: Thrixty Player v1.4
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
