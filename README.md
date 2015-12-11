@@ -53,13 +53,16 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
+* V1.5.1:
+	* Support of neweset Thrixty Version 1.5.1.
 * V1.0 (Release):
-    * Automatic embedding of base files
-    * Shortcode Generator
-    * Central Settings
+    * Automatic embedding of base files.
+    * Shortcode Generator.
+    * Central Settings.
 
 ### 6.) Planned Features and Changes
-* Change the setting fields to textfield and radiobutton respectively.
+* Translate Backend language to english...
+* Change the setting fields to textfield, radiobutton and dropdown respectively.
 
 ### 7.) License
 ```txt
