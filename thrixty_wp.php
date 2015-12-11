@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player v1.4
+	 * Plugin Name: Thrixty Player dev1.5.1
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 1.4
+	 * Version: dev1.5.1
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 1.4
+	 * @version dev1.5.1
 	 */
 
 

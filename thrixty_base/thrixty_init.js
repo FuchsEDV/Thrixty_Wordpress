@@ -1,12 +1,12 @@
 /**
  *  @fileOverview
  *  @author F.Heitmann @ Fuchs EDV Germany
- *  @version 1.4
+ *  @version dev1.5.1
  *  @license GPLv3
  *  @module ThrixtyPlayer.MainClass
  */
 ;"use strict";
-var thrixty_version = "dev1.4";
+var thrixty_version = "dev1.5.1";
 
 /* 1.: define ThrixtyPlayer Namespace */
 /**
