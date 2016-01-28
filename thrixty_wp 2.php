@@ -332,7 +332,82 @@
 	add_action('admin_init', 'thrixty_admin_init');
 	function thrixty_admin_init(){
 		register_setting( 'thrixty_options', 'thrixty_options');
+
+		add_settings_section('thrixty_settings_section', 'Thrixty Player Einstellungen', 'thrixty_options_section', 'thrixty_options_page');
+			add_settings_field('plugin_basepath', 'Basepath', 'thrixty_options_basepath', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_filelist_path_small', 'Filelist Path Small', 'thrixty_options_filelist_path_small', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_filelist_path_large', 'Filelist Path Large', 'thrixty_options_filelist_path_large', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_zoom_mode', 'Zoom Mode', 'thrixty_options_zoom_mode', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_outbox_position', 'Outbox Position', 'thrixty_options_outbox_position', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_position_indicator', 'Position Indicator', 'thrixty_options_position_indicator', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_zoom_control', 'Zoom Control', 'thrixty_options_zoom_control', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_direction', 'Direction', 'thrixty_options_direction', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_cycle_duration', 'Cycle Duration', 'thrixty_options_cycle_duration', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_sensitivity_x', 'Sensitivity X', 'thrixty_options_sensitivity_x', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_autoload', 'Autoload', 'thrixty_options_autoload', 'thrixty_options_page', 'thrixty_settings_section');
+			add_settings_field('plugin_autoplay', 'Autoplay', 'thrixty_options_autoplay', 'thrixty_options_page', 'thrixty_settings_section');
 	}
+	// These functions belong to the admin init...
+		function thrixty_options_section(){
+		?>
+			<b>Bitte lesen Sie die <a href="#pageinfo">Seiteninformationen</a> und die <a href="#paraminfo">Parametererkl&auml;rungen</a>, bevor Sie hier Einstellungen vornehmen!</b>
+			<p>
+				Nicht gef&uuml;llte Felder greifen auf die Standardwerte des Thrixtyplayers selbst zurück.
+			</p>
+		<?php
+		}
+		// TODO: placeholder for the non-mandatory values
+		// TODO: tooltips or smt similar to explain in less space
+		// TODO: dropdowns for a fixed amount of options
+		function thrixty_options_basepath() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_basepath' name='thrixty_options[basepath]' size='40' type='text' value='{$options['basepath']}' />";
+		}
+		function thrixty_options_filelist_path_small() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_filelist_path_small' name='thrixty_options[filelist_path_small]' size='40' type='text' value='{$options['filelist_path_small']}' />";
+		}
+		function thrixty_options_filelist_path_large() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_filelist_path_large' name='thrixty_options[filelist_path_large]' size='40' type='text' value='{$options['filelist_path_large']}' />";
+		}
+		function thrixty_options_zoom_mode() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' value='{$options['zoom_mode']}' />";
+		}
+		function thrixty_options_outbox_position() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' value='{$options['outbox_position']}' />";
+		}
+		function thrixty_options_position_indicator() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_position_indicator' name='thrixty_options[position_indicator]' size='40' type='text' value='{$options['position_indicator']}' />";
+		}
+		function thrixty_options_zoom_control() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' value='{$options['zoom_control']}' />";
+		}
+		function thrixty_options_direction() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' value='{$options['direction']}' />";
+		}
+		function thrixty_options_cycle_duration() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_cycle_duration' name='thrixty_options[cycle_duration]' size='40' type='text' value='{$options['cycle_duration']}' />";
+		}
+		function thrixty_options_sensitivity_x() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' value='{$options['sensitivity_x']}' />";
+		}
+		function thrixty_options_autoload() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' value='{$options['autoload']}' />";
+		}
+		function thrixty_options_autoplay() {
+			$options = get_option('thrixty_options');
+			echo "<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' value='{$options['autoplay']}' />";
+		}
+	// /
 	/**
 	 * Thrixty Player Settings Page for Admin Backend
 	 *
@@ -357,244 +432,9 @@
 			if( isset($_POST['post_ids']) ){
 				thrixty_convert_box3d_shortcodes($_POST['post_ids']);
 			} else {
+				// now build the HTML
 				thrixty_options_page_html();
 			}
-		}
-		/**
-		 * Thrixty Player Settings Page HTML
-		 *
-		 * This function builds the HTML for the settings page.
-		 *
-		 * @name thrixty_options_page_html
-		 *
-		 * @param /
-		 * @return /
-		 */
-		function thrixty_options_page_html() {
-			$thrixty_options = get_option('thrixty_options');
-			$box3d_options = get_option("box3d_options");
-
-			?>
-			<div class="wrap">
-				<h2>Thrixty Player - Allgemeine Einstellungen</h2>
-				<p>Hier k&ouml;nnen Sie allgemeine Standardwerte festlegen.</p>
-				<form action="options.php" method="post">
-					<?php settings_fields('thrixty_options'); ?>
-					<!--TODO: tooltip oder so-->
-					<b>Bitte lesen Sie die <a href="#pageinfo">Seiteninformationen</a>, bevor Sie hier Einstellungen vornehmen!</b>
-					<p>
-						Nicht gef&uuml;llte Felder greifen auf die Standardwerte des Thrixtyplayers selbst zurück.
-					</p>
-					<style>
-						#thrixty_settings_table td{
-							vertical-align: top;
-							border: 1px solid lightgray;
-							border-collapse: collapse;
-						}
-					</style>
-					<table id="thrixty_settings_table">
-						<tr>
-							<th>Option</th>
-							<th>Value</th>
-							<th>Description</th>
-						</tr>
-						<tr>
-							<td>Basepath</td>
-							<td>
-								<input id='plugin_basepath' name='thrixty_options[basepath]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['basepath']; ?>' />
-							</td>
-							<td rowspan="3">
-								Dies ist der Grundpfad, von dem aus nach den beiden Filelists gesucht wird.<br>
-								Beispiel: <b>http://example.com/360_pictures/</b>[filelist-paths]<br>
-								F&uuml;r diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
-								<b>"__SITE__"</b>: Verweist auf die URL der Startseite.<br>
-								<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch f&uuml;r die Ressourcen benutzt wird.<br>
-								<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird.<br>
-								<?php if( isset($box3d_options["path"]) ){ ?>
-									Der alte Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
-								<? } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>Filelist Path Small</td>
-							<td>
-								<input id='plugin_filelist_path_small' name='thrixty_options[filelist_path_small]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['filelist_path_small']; ?>' />
-							</td>
-							<!--<td>filelist_path_small</td>-->
-						</tr>
-						<tr>
-							<td>Filelist Path Large</td>
-							<td>
-								<input id='plugin_filelist_path_large' name='thrixty_options[filelist_path_large]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['filelist_path_large']; ?>' />
-							</td>
-							<!--<td>filelist_path_large</td>-->
-						</tr>
-						<tr>
-							<td>Zoom Mode</td>
-							<td>
-								<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['zoom_mode']; ?>' />
-							</td>
-							<td>
-								Hier kann die Zoom Art gew&auml;hlt werden.<br>
-								Der Inbox-Zoom zoomt das Bild direkt gr&ouml;&szlig;er.<br>
-								Der Outbox-Zoom erzeugt dagegen ein extra Fenster.<br>
-								(Im Fullscreen wird aus dem Outbox vorr&uuml;bergehend in den normalen Inbox-Zoom gewechselt!)<br>
-								M&ouml;gliche Werte:<br>
-								<b>inbox</b>, outbox<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Outbox Position</td>
-							<td>
-								<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['outbox_position']; ?>' />
-							</td>
-							<td>
-								Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
-								M&ouml;gliche Werte:<br>
-								<b>right</b>, bottom, left, top<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Position Indicator</td>
-							<td>
-								<input id='plugin_position_indicator' name='thrixty_options[position_indicator]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['position_indicator']; ?>' />
-							</td>
-							<td>
-								Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
-								Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
-								Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
-								M&ouml;gliche Werte:<br>
-								<b>minimap</b>, marker, none<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Zoom Control</td>
-							<td>
-								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['zoom_control']; ?>' />
-							</td>
-							<td>
-								Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
-								Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
-								Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
-								M&ouml;gliche Werte:<br>
-								<b>progressive</b>, classic<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Direction</td>
-							<td>
-								<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['direction']; ?>' />
-							</td>
-							<td>
-								Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
-								Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
-								Objekte, die sich gegen den Uhrzeigersinn drehen, werden "backward" drehend genannt.<br>
-								<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
-								Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
-								<?php if( isset($box3d_options["direction"]) ){ ?>
-									Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
-								<? } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>Cycle Duration</td>
-							<td>
-								<input id='plugin_cycle_duration' name='thrixty_options[cycle_duration]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['cycle_duration']; ?>' />
-							</td>
-							<td>
-								Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte f&uuml;r alle Objekte gleich sein, um Gleichm&auml;&szlig;igkeit &uuml;ber die ganze Seite zu gew&auml;hrleisten.<br>
-								Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden f&uuml;r eine komplette Drehung<br>
-								<?php if( isset($box3d_options["framerate"]) ){ ?>
-									<td><?php echo (72 / $box3d_options["framerate"]); ?></td>
-								<? } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>Sensitivity X</td>
-							<td>
-								<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['sensitivity_x']; ?>' />
-							</td>
-							<td>
-								Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste z&auml;hlt.<br>
-								Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
-								Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Autoload</td>
-							<td>
-								<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['autoload']; ?>' />
-							</td>
-							<td>
-								Diese Option gibt an, ob die Player automatisch ihre Bilder laden sollen.<br>
-								Auf Mobil-geräten wird diese Option vom Thrixty ignoriert und niemals Bilder automatisch geladen.</b>
-								M&ouml;gliche Werte:<br>
-								<b>on</b>, off<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Autoplay</td>
-							<td>
-								<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['autoplay']; ?>' />
-							</td>
-							<td>
-								Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
-								M&ouml;gliche Werte:<br>
-								<b>first</b>, all_on, all_off<br>
-							</td>
-						</tr>
-					</table>
-					<br>
-					<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
-				</form>
-				<br>
-				<hr>
-				<h3 id="pageinfo">Seiteninformationen</h3>
-				<p>
-					&Uuml;ber den "3D" Button im Artikel Editor (visuell) k&ouml;nnen Sie einen Shortcode generieren.<br>
-					Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>&uuml;berschreiben</i></b> die allgemeinen Einstellungen, die sie hier t&auml;tigen.<br>
-					Die allgemeinen Einstellungen sind daf&uuml;r gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
-				</p>
-				<p>
-					Wenn es f&uuml;r eine Option keinen allgemeing&uuml;ltigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
-					Dies wird mit den beiden Optionen <b>thrixtyplayer-filelist-path-small</b> und <b>thrixtyplayer-filelist-path-large</b> immer passieren!<br>
-				</p>
-				<p>
-					Die allgemeinen Einstellungen sind vor allem dann hilfreich, wenn alle Ihre f&uuml;r den Player ben&ouml;tigten Listen im selben Grundordner liegen (empfohlen).<br>
-				</p>
-				<br>
-				<p>
-					Ein typischer Thrixty Shortcode:<br>
-					<b>[thrixty object_name="example" ]</b><br>
-					Die Player-Generierung fällt bei nicht angebenen Werten auf die Einstellungen dieser Seite zurück.<br>
-					Sollten diese nicht gesetzt worden sein, kann es passieren, dass der Player die entsprechenden Bilddateien nicht findet.<br>
-				</p>
-				<hr>
-				<h3>Error Sektion</h3>
-				<p>
-					&gt;&gt;&gt; Beschriebungen hier &lt;&lt;&lt;
-				</p>
-				<h3 id="paraminfo">Erkl&auml;rung der Parameter und ihrer Werte</h3>
-				[Hier waren die Beschreibungen]
-				<br>
-				<hr>
-				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
-				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
-					<p>
-						Fuer den Fall, dass Sie vorher Box3D verwendet haben, k&ouml;nnen Sie hier automatisch Box3D Shortcodes in Thrixty Shortcodes &uuml;bersetzen lassen.<br>
-						Bitte bedenken Sie dabei, dass es einige Funktionen nicht mehr gibt oder auch neue dazu gekommen sind.<br>
-						Die Filelists selber werden NICHT kontrolliert!<br>
-						<br>
-						<b>Bitte setzen Sie ihre Einstellungen, <i>BEVOR</i></b> Sie diese Funktion nutzen!<br>
-						Insbesondere <b>Basepath</b> sollte gesetzt sein!<br>
-						<br>
-						Geben Sie entweder "all" an, um alle Posts und Pages nach dem alten Shortcode durchsuchen zu lassen, oder eine komma-getrennte Liste mit den entsprechenden IDs.<br>
-						<input name="post_ids" type="text" placeholder="Post IDs or 'all'" />
-						<input name="Submit" type="submit" value="Start Box3D to Thrixty Conversion" /><br>
-						<i><b>ACHTUNG! Dies kann nur per Hand r&uuml;ckg&auml;ngig gemacht werden!</b></i><br>
-					</p>
-				</form>
-			</div><?php
 		}
 		/**
 		 * Thrixty Player Settings Shortcode Converter
@@ -698,7 +538,159 @@
 
 			}
 		}
+		/**
+		 * Thrixty Player Settings Page HTML
+		 *
+		 * This function builds the HTML for the settings page.
+		 *
+		 * @name thrixty_options_page_html
+		 *
+		 * @param /
+		 * @return /
+		 */
+		function thrixty_options_page_html() {
+			$thrixty_options = get_option('thrixty_options');
+			$box3d_options = get_option("box3d_options");
 
+			?>
+			<div class="wrap">
+				<h2>Thrixty Player - Allgemeine Einstellungen</h2>
+				<p>Hier k&ouml;nnen Sie allgemeine Standardwerte festlegen.</p>
+				<form action="options.php" method="post">
+					<?php settings_fields('thrixty_options'); ?>
+					<!--asd-->
+					<?php do_settings_sections('thrixty_options_page'); ?>
+					<!--/asd-->
+					<br>
+					<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
+				</form>
+				<br>
+				<hr>
+				<h3 id="pageinfo">Seiteninformationen</h3>
+				<p>
+					&Uuml;ber den "3D" Button im Artikel Editor (visuell) k&ouml;nnen Sie einen Shortcode generieren.<br>
+					Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>&uuml;berschreiben</i></b> die allgemeinen Einstellungen, die sie hier t&auml;tigen.<br>
+					Die allgemeinen Einstellungen sind daf&uuml;r gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
+				</p>
+				<p>
+					Wenn es f&uuml;r eine Option keinen allgemeing&uuml;ltigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
+					Dies wird mit den beiden Optionen <b>thrixtyplayer-filelist-path-small</b> und <b>thrixtyplayer-filelist-path-large</b> immer passieren!<br>
+				</p>
+				<p>
+					Die allgemeinen Einstellungen sind vor allem dann hilfreich, wenn alle Ihre f&uuml;r den Player ben&ouml;tigten Listen im selben Grundordner liegen (empfohlen).<br>
+				</p>
+				<br>
+				<p>
+					Wenn <b>keine</b> Einstellungen angegeben wurden, sieht ein typischer Shortcode so aus:<br>
+					<b>[thrixty basepath="http://example.com/360_pictures/" thrixtyplayer-filelist-path-small="test_small.txt" thrixtyplayer-filelist-path-large="test_large.txt" thrixtyplayer-cycle_duration="5" thrixtyplayer-direction="forward" thrixtyplayer-sensitivity-x="20" thrixtyplayer-zoom-mode="inbox_minimap" ]</b><br>
+					<br>
+					Wenn <b>alle</b> Einstellungen angegeben wurden, sieht ein typischer Shortcode so aus:<br>
+					<b>[thrixty thrixtyplayer-filelist-path-small="test_small.txt" thrixtyplayer-filelist-path-large="test_large.txt" ]</b><br>
+				</p>
+				<br>
+				<hr>
+				<h3 id="paraminfo">Erkl&auml;rung der Parameter und ihrer Werte</h3>
+				<p>
+					<b>Basepath:</b><br>
+					Dies ist der Grundpfad, von dem aus nach den beiden Filelists gesucht wird.<br>
+					Beispiel: <b>http://example.com/360_pictures/</b>[filelist-paths]<br>
+					F&uuml;r diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
+					<b>"__SITE__"</b>: Verweist auf die URL der Startseite.<br>
+					<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch f&uuml;r die Ressourcen benutzt wird.<br>
+					<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird.<br>
+					<?php if( isset($box3d_options["path"]) ){ ?>
+						Der alte Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
+					<? } ?>
+				</p>
+				<p>
+					<b>Zoom Mode</b><br>
+					Hier kann die Zoom Art gew&auml;hlt werden.<br>
+					Der Inbox-Zoom zoomt das Bild direkt gr&ouml;&szlig;er.<br>
+					Der Outbox-Zoom erzeugt dagegen ein extra Fenster.<br>
+					(Im Fullscreen wird aus dem Outbox vorr&uuml;bergehend in den normalen Inbox-Zoom gewechselt!)<br>
+					M&ouml;gliche Werte:<br>
+					<b>inbox</b>, outbox<br>
+				</p>
+				<p>
+					<b>Outbox Position</b><br>
+					Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
+					M&ouml;gliche Werte:<br>
+					<b>right</b>, bottom, left, top<br>
+				</p>
+				<p>
+					<b>Positions Anzeiger</b><br>
+					Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
+					Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
+					Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
+					M&ouml;gliche Werte:<br>
+					<b>minimap</b>, marker, none<br>
+				</p>
+				<p>
+					<b>Zoom Steuerung</b><br>
+					Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
+					Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
+					Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
+					M&ouml;gliche Werte:<br>
+					<b>progressive</b>, classic<br>
+				</p>
+				<p>
+					<b>Direction</b><br>
+					Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
+					Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
+					Objekte, die sich gegen den Uhrzeigersinn drehen, werden "backward" drehend genannt.<br>
+					<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
+					Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
+					<?php if( isset($box3d_options["direction"]) ){ ?>
+						Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
+					<? } ?>
+				</p>
+				<p>
+					<b>Cycle Duration</b><br>
+					Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte f&uuml;r alle Objekte gleich sein, um Gleichm&auml;&szlig;igkeit &uuml;ber die ganze Seite zu gew&auml;hrleisten.<br>
+					Die (empfohlene) Standardeinstellung: <b>5</b> Sekunden f&uuml;r eine komplette Drehung<br>
+					<?php if( isset($box3d_options["framerate"]) ){ ?>
+						<td><?php echo (72 / $box3d_options["framerate"]); ?></td>
+					<? } ?>
+				</p>
+				<p>
+					<b>Sensitivity X</b><br>
+					Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste z&auml;hlt.<br>
+					Dies ist wichtig, um das "Wurstfinger-Problem" zu umgehen.<br>
+					Die (empfohlene) Standardeinstellung: <b>20</b> Pixel<br>
+				</p>
+				<p>
+					<b>Autoload</b><br>
+					Diese Option gibt an, ob die Player automatisch ihre Bilder laden sollen.<br>
+					Auf Mobil-geräten wird diese Option vom Thrixty ignoriert und niemals Bilder automatisch geladen.</b>
+					M&ouml;gliche Werte:<br>
+					<b>on</b>, off<br>
+				</p>
+				<p>
+					<b>Autoplay</b><br>
+					Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
+					M&ouml;gliche Werte:<br>
+					<b>first</b>, all_on, all_off<br>
+				</p>
+				<br>
+				<hr>
+				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
+				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
+					<p>
+						Fuer den Fall, dass Sie vorher Box3D verwendet haben, k&ouml;nnen Sie hier automatisch Box3D Shortcodes in Thrixty Shortcodes &uuml;bersetzen lassen.<br>
+						Bitte bedenken Sie dabei, dass es einige Funktionen nicht mehr gibt oder auch neue dazu gekommen sind.<br>
+						Die Filelists selber werden NICHT kontrolliert!<br>
+						<br>
+						<b>Bitte setzen Sie ihre Einstellungen, <i>BEVOR</i></b> Sie diese Funktion nutzen!<br>
+						Insbesondere <b>Basepath</b> sollte gesetzt sein!<br>
+						<br>
+						Geben Sie entweder "all" an, um alle Posts und Pages nach dem alten Shortcode durchsuchen zu lassen, oder eine komma-getrennte Liste mit den entsprechenden IDs.<br>
+						<input name="post_ids" type="text" placeholder="Post IDs or 'all'" />
+						<input name="Submit" type="submit" value="Start Box3D to Thrixty Conversion" /><br>
+						<i><b>ACHTUNG! Dies kann nur per Hand r&uuml;ckg&auml;ngig gemacht werden!</b></i><br>
+					</p>
+				</form>
+			</div><?php
+		}
 	// /
 
 

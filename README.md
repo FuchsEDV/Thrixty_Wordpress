@@ -11,8 +11,8 @@ ToC:
 * 7.: License
 
 ### 1.) Thrixty Player for Wordpress
-This Wordpress plugin is using shortcodes to generate content fit for use with the Thrixty Player.
-You can define some default options that will help you displaying your objects in the same fashion.
+This Wordpress plugin is using shortcodes to generate Thrixty Player Elements.
+You can define default options that will help you displaying your objects in the same fashion.
 
 ### 2.) Base Repository
 This project is built upon the [Thrixty Player](https://github.com/FuchsEDV/Thrixty).
