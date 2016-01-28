@@ -356,9 +356,8 @@
 			// if this POST var was set, the button for box3d to thrixty conversion was pressed.
 			if( isset($_POST['post_ids']) ){
 				thrixty_convert_box3d_shortcodes($_POST['post_ids']);
-			} else {
-				thrixty_options_page_html();
 			}
+			thrixty_options_page_html();
 		}
 		/**
 		 * Thrixty Player Settings Page HTML
@@ -676,6 +675,7 @@
 					/// filelist small and large paths
 						if( isset($old_sc_atts["object"]) && $old_sc_atts["object"] != "" ){
 							$new_shortcode .= "object_name='".$old_sc_atts["object"]."' ";
+							// TODO: if these paths are the same as in settings, do not append to the shortcode
 							$new_shortcode .= "filelist_path_small='small/Filelist.txt' ";
 							$new_shortcode .= "filelist_path_large='large/Filelist.txt' ";
 						}
