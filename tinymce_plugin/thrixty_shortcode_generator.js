@@ -28,23 +28,21 @@ jQuery(document).ready(function(){
 	// the overlay as root object needs to be known to all functions -> document-wide scope
 	var overlay;
 	function generate_dialog(tinymce_obj){
-		// check for variable set by plugin
+		// its pointless to generate a dialogue, when 'thrixty_sc_gen_var' wasnt set...
 		if( typeof(thrixty_sc_gen_var) !== 'undefined' ){
-			// create a gray overlay over the entire page
-			overlay = jQuery('<div id="generator_dialog" style="display:none; box-sizing:border-box; position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(0,0,0,0.5); z-index:9999;       padding:50px 0;"></div>');
-			jQuery("body").append(overlay);
-				// generator dialog container - in the middle of the dialog
-				// todo: vertical center -> use three divs "outer", "middle" and "inner" -> middle one gets "vertical-align: center;"
-				var gen_container = jQuery('<div style="box-sizing:border-box; margin:auto; width:600px; background:white; border:3px solid #555555; padding: 15px;"></div>');
-				overlay.append(gen_container);
+			overlay = jQuery('<div id="overlay"></div>'); jQuery("body").append(overlay);
+				var gen_dialog = jQuery('<div id="generator_dialog"></div>'); overlay.append(gen_dialog);
 				var styles_text = "<style>";
+					styles_text += "#overlay{ display: none; box-sizing: border-box; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,0.5); z-index: 9999; padding: 50px 0; }";
+					styles_text += "#generator_dialog{ box-sizing: border-box; margin: auto; width: 600px; background: white; border: 3px solid #555555; padding: 15px; max-width: 100%; max-height: 100%; overflow-y: scroll; }";
+					styles_text += "#generator_dialog #reuse_basepath{font-size: 10px; height:initial; width:initial;}";
 					styles_text += "#generator_dialog input, #generator_dialog select{width:100%;}";
 					styles_text += "#generator_dialog td:nth-child(1){text-align:left; width:0;}";
 					styles_text += "#generator_dialog td:nth-child(2){text-align:center;}";
 					styles_text += "#generator_dialog button{width:100%; height: 40px;}";
 					styles_text += "#generator_dialog input:disabled{border: transparent; box-shadow: none;}";
 				styles_text += "</style>";
-				gen_container.append(jQuery(styles_text));
+				gen_dialog.append(jQuery(styles_text));
 				var stuff = "<form id='thrixty_generator_form' name='thrixty_generator_form'>";
 					stuff += "<table style='width:100%; height:100%; text-align:center;'>";
 						stuff += "<tr>";
@@ -53,7 +51,11 @@ jQuery(document).ready(function(){
 						stuff += "</tr>";
 						stuff += "<tr>";
 							stuff += "<td><label for='basepath'>basepath</label></td>";
-							stuff += "<td><input id='basepath' class='path_observe' name='basepath' type='text' placeholder='"+thrixty_sc_gen_var.basepath+"' /></td>";
+							stuff += "<td><input id='basepath' class='path_observe' name='basepath' type='text' placeholder='"+thrixty_sc_gen_var.basepath+"' /><br></td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
+							stuff += "<td></td>";
+							stuff += "<td><button id='reuse_basepath' type='button'>Plugineinstellung &uuml;bernehmen</button></td>";
 						stuff += "</tr>";
 						stuff += "<tr>";
 							stuff += "<td><label for='object_name'>object_name</label></td>";
@@ -70,10 +72,10 @@ jQuery(document).ready(function(){
 						stuff += "<tr><td colspan='2'><hr></td></tr>";
 						stuff += "<tr>";
 							stuff += "<td><label for='cur_small_path'>current small path</label></td>";
-							stuff += "<td id='cur_small_path'>"+thrixty_sc_gen_var.basepath_replaced+thrixty_sc_gen_var.filelist_path_small+"</td>";
+							stuff += "<td id='cur_small_path'></td>";
 						stuff += "</tr>";
 							stuff += "<td><label for='cur_large_path'>current large path</label></td>";
-							stuff += "<td id='cur_large_path'>"+thrixty_sc_gen_var.basepath_replaced+thrixty_sc_gen_var.filelist_path_large+"</td>";
+							stuff += "<td id='cur_large_path'></td>";
 						stuff += "</tr>";
 						stuff += "<tr><td colspan='2'><hr></td></tr>";
 						stuff += "<tr>";
@@ -152,19 +154,54 @@ jQuery(document).ready(function(){
 						stuff += "</tr>";
 						stuff += "<tr>";
 							stuff += "<td><button type='button' id='close' style='background:red;'>Cancel</button></td>";
-							stuff += "<td><button type='button' id='ok' style='background:green;'>Generate</button></td>";
+							stuff += "<td><button type='submit' id='ok' style='background:green;'>Generate</button></td>";
 						stuff += "</tr>";
 					stuff += "</table>";
 				stuff += "</form>";
-				// gen_container.html(stuff);
-				gen_container.append(jQuery(stuff));
-			gen_container.find("#ok").on(
+				// gen_dialog.html(stuff);
+				gen_dialog.append(jQuery(stuff));
+
+
+
+			var gen_form = gen_dialog.find("#thrixty_generator_form");
+			var bp_field = gen_dialog.find("#basepath");
+			var on_field = gen_dialog.find("#object_name");
+			var fs_field = gen_dialog.find("#filelist_path_small");
+			var fl_field = gen_dialog.find("#filelist_path_large");
+			var cur_sm_p = gen_dialog.find("#cur_small_path");
+			var cur_la_p = gen_dialog.find("#cur_large_path");
+			var reuse_bp_btn = gen_dialog.find("#reuse_basepath")
+			var close_btn = gen_dialog.find("#close");
+			var ok_btn = gen_dialog.find("#ok");
+
+
+
+			reuse_bp_btn.on(
 				"click",
 				function(e){
-					// do not submit this form
+					var basepath_elem = bp_field[0];
+					basepath_elem.value = basepath_elem.placeholder;
+					// TODO: TRIGGER PATH OBSERVE
+					bp_field.trigger("input");
+				}
+			);
+			close_btn.on(
+				"click",
+				function(){
+					overlay.hide();
+				}
+			);
+			ok_btn.on(
+				"click",
+				function(e){
+					overlay.hide();
+				}
+			);
+			gen_form.on(
+				"submit",
+				function(e){
 					e.preventDefault();
 
-					// send
 					var elem = jQuery('#thrixty_generator_form')[0];
 
 					// generate shortcode
@@ -179,9 +216,7 @@ jQuery(document).ready(function(){
 								}
 								break;
 							case "object_name":
-								if( current_elem.value != "" ){
-									content += "object_name=\""+current_elem.value+"\" ";
-								}
+								content += "object_name=\""+current_elem.value+"\" ";
 								break;
 							case "filelist_path_small":
 								if( current_elem.value != "" ){
@@ -246,41 +281,44 @@ jQuery(document).ready(function(){
 					content += "]";
 					// write shortcode into the editor area
 					tinymce_obj.selection.setContent(content);
-					overlay.hide();
-				}
-			);
-			gen_container.find("#close").on(
-				"click",
-				function(){
-					overlay.hide();
+
+					/* clear the input fields */
+					gen_form[0].reset();
 				}
 			);
 
 
 
-			var bp_field = gen_container.find("#basepath")[0];
-			var on_field = gen_container.find("#object_name")[0];
-			var fs_field = gen_container.find("#filelist_path_small")[0];
-			var fl_field = gen_container.find("#filelist_path_large")[0];
-			var cur_sm_p = gen_container.find("#cur_small_path");
-			var cur_la_p = gen_container.find("#cur_large_path");
-			gen_container.find(".path_observe").on(
+			gen_dialog.find(".path_observe").on(
 				// "keyup change input",
 				"input",
 				debounce(
 					function(e){
-						var object_path = thrixty_sc_gen_var.basepath_replaced + on_field.value;
-						object_path += object_path.charAt(object_path.length-1) === "/" ? "" : "/";
-						/* preview paths */
-						var small_path = fs_field.value || fs_field.placeholder;
-						var large_path = fl_field.value || fl_field.placeholder;
-						small_path = object_path + small_path;
-						large_path = object_path + large_path;
-						cur_sm_p.html(small_path);
-						cur_la_p.html(large_path);
+						var basepath = bp_field.val() != "" ? bp_field.val() : thrixty_sc_gen_var.basepath;
+							basepath = basepath.replace("__SITE__",   thrixty_sc_gen_var.__SITE__);
+							basepath = basepath.replace("__PLUGIN__", thrixty_sc_gen_var.__PLUGIN__);
+							basepath = basepath.replace("__UPLOAD__", thrixty_sc_gen_var.__UPLOAD__);
+
+						var object_name = on_field.val();
+						var filelist_small = fs_field.val() != "" ? fs_field.val() : thrixty_sc_gen_var.filelist_path_small;
+						var filelist_large = fl_field.val() != "" ? fl_field.val() : thrixty_sc_gen_var.filelist_path_large;
+
+						var path_small = basepath;
+						var path_large = basepath;
+							path_small += path_small.charAt(path_small.length-1) === "/" ? "" : "/";
+							path_large += path_large.charAt(path_large.length-1) === "/" ? "" : "/";
+							path_small += object_name;
+							path_large += object_name;
+							path_small += path_small.charAt(path_small.length-1) === "/" ? "" : "/";
+							path_large += path_large.charAt(path_large.length-1) === "/" ? "" : "/";
+							path_small += filelist_small;
+							path_large += filelist_large;
+
+						cur_sm_p.html(path_small);
+						cur_la_p.html(path_large);
 						// check the file actually being
 						jQuery.ajax({
-							url: small_path,
+							url: path_small,
 							success: function(){
 								cur_sm_p.css("color", "green");
 							},
@@ -289,7 +327,7 @@ jQuery(document).ready(function(){
 							},
 						});
 						jQuery.ajax({
-							url: large_path,
+							url: path_large,
 							success: function(){
 								cur_la_p.css("color", "green");
 							},
@@ -303,12 +341,13 @@ jQuery(document).ready(function(){
 					500
 				)
 			);
+
 			// alles erfolgreich?
 			return true;
-		} /*endif*/ else {
+		} else {
 			// error?
 			return false;
-		}
+		} /*endif*/
 	};
 
 

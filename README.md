@@ -53,15 +53,20 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
+* V1.6.1:
+	* TinyMCE-Extension extended.
+	* Update to Thrixty Version 1.6.1
+* V1.6:
+	* Update to Thrixty Version 1.6.
 * V1.5.1:
-	* Support of neweset Thrixty Version 1.5.1.
+	* Support of newest Thrixty Version 1.5.1.
 * V1.0 (Release):
     * Automatic embedding of base files.
     * Shortcode Generator.
     * Central Settings.
 
 ### 6.) Planned Features and Changes
-* Translate Backend language to english...
+* l18n - Translate backend language to english with an OPTION for german.
 * Change the setting fields to textfield, radiobutton and dropdown respectively.
 
 ### 7.) License

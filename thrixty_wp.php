@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player 1.6
+	 * Plugin Name: Thrixty Player 1.6.1
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 1.6
+	 * Version: 1.6.1
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 1.6
+	 * @version 1.6.1
 	 */
 
 
@@ -36,9 +36,9 @@
 			add_option(
 				"thrixty_options",
 				array(
-					"basepath" => "__SITE__/360_objects/",
-					"filelist_path_small" => "small/Filelist.txt",
-					"filelist_path_large" => "large/Filelist.txt",
+					"basepath" => "__SITE__/360shots_objekte/", // player standard: ""
+					"filelist_path_small" => "", // player standard: "small/Filelist.txt"
+					"filelist_path_large" => "", // player standard: "large/Filelist.txt"
 					"zoom_mode" => "", // player standard: inbox
 					"outbox_position" => "", // player standard: right
 					"position_indicator" => "", // player standard: minimap
@@ -136,20 +136,15 @@
 					add_action('wp_print_scripts', 'give_thrixty_options_to_js');
 					function give_thrixty_options_to_js(){
 						$thrixty_options = get_option("thrixty_options");
-
-						$basepath = $thrixty_options["basepath"];
-						$basepath_replaced = str_replace("__PLUGIN__", plugins_url("", __FILE__), $basepath);
 						$upload_dir = wp_upload_dir();
-						$basepath_replaced = str_replace("__UPLOAD__", $upload_dir["baseurl"], $basepath_replaced);
-						$basepath_replaced = str_replace("__SITE__", get_site_url(), $basepath_replaced);
-						$basepath_replaced = trailingslashit($basepath_replaced);
-
 						$to_sc_gen = array(
-							"basepath" => $basepath,
-							"basepath_replaced" => $basepath_replaced,
-							"object_name" => "",
-							"filelist_path_small" => "small/Filelist.txt",
-							"filelist_path_large" => "large/Filelist.txt",
+							"__PLUGIN__" => plugins_url("", __FILE__),
+							"__UPLOAD__" => $upload_dir["baseurl"],
+							"__SITE__" => get_site_url(),
+							"basepath" => $thrixty_options["basepath"],
+							// "object_name" => "",
+							"filelist_path_small" => $thrixty_options["filelist_path_small"] ? : "small/Filelist.txt",
+							"filelist_path_large" => $thrixty_options["filelist_path_large"] ? : "large/Filelist.txt",
 							// "zoom_mode" => $thrixty_options["zoom_mode"],
 							// "outbox_position" => $thrixty_options["outbox_position"],
 							// "position_indicator" => $thrixty_options["position_indicator"],
@@ -193,13 +188,7 @@
 		$atts = $atts;
 		$thrixty_options = get_option("thrixty_options");
 		$div_attrs = array();
-		if( !$atts["object_name"] ){
-			// abort - this shortcode is not interpretable
-			// error = 1
-			return "";
-		} else {
-			// fill the mandatory fields
-			/* basepath */
+		/* basepath */
 			if( !!$atts["basepath"] ){
 				$basepath = $atts["basepath"];
 			} else if( !!$thrixty_options["basepath"] ){
@@ -211,102 +200,88 @@
 			$upload_dir = wp_upload_dir();
 			$basepath = str_replace("__UPLOAD__", $upload_dir["baseurl"], $basepath);
 			$basepath = str_replace("__SITE__", get_site_url(), $basepath);
-			$basepath = trailingslashit($basepath);
+
+			/* $atts["object_name"] only exists as a shortcode attribute !!! */
+			$basepath = trailingslashit(trailingslashit($basepath).$atts["object_name"]);
 			$div_attrs["basepath"] = $basepath;
-
-			/* filelist_path_small */
+		/* filelist_path_small */
 			if( !!$atts["filelist_path_small"] ){
-				$div_attrs["filelist_path_small"] = trailingslashit($atts["object_name"]).$atts["filelist_path_small"];
+				$div_attrs["filelist_path_small"] = $atts["filelist_path_small"];
 			} else if( !!$thrixty_options["filelist_path_small"] ){
-				$div_attrs["filelist_path_small"] = trailingslashit($atts["object_name"]).$thrixty_options["filelist_path_small"];
-			} else {
-				$div_attrs["filelist_path_small"] = "";
+				$div_attrs["filelist_path_small"] = $thrixty_options["filelist_path_small"];
 			}
-			/* filelist_path_large */
+		/* filelist_path_large */
 			if( !!$atts["filelist_path_large"] ){
-				$div_attrs["filelist_path_large"] = trailingslashit($atts["object_name"]).$atts["filelist_path_large"];
+				$div_attrs["filelist_path_large"] = $atts["filelist_path_large"];
 			} else if( !!$thrixty_options["filelist_path_large"] ){
-				$div_attrs["filelist_path_large"] = trailingslashit($atts["object_name"]).$thrixty_options["filelist_path_large"];
-			} else {
-				$div_attrs["filelist_path_large"] = "";
+				$div_attrs["filelist_path_large"] = $thrixty_options["filelist_path_large"];
 			}
-
-			// check all mandatories being filled
-			if( !$div_attrs["basepath"] && !$div_attrs["filelist_path_small"] && !$div_attrs["filelist_path_large"] ){
-				// abort - the paths are not correct
-				// error = 2
-				return "";
-			} else {
-				/* append optionals where needed */
-				/* zoom_mode */
-				if( !!$atts["zoom_mode"] ){
-					$div_attrs["zoom_mode"] = $atts["zoom_mode"];
-				} else if( !!$thrixty_options["zoom_mode"] ){
-					$div_attrs["zoom_mode"] = $thrixty_options["zoom_mode"];
-				}
-				/* outbox_position */
-				if( !!$atts["outbox_position"] ){
-					$div_attrs["outbox_position"] = $atts["outbox_position"];
-				} else if( !!$thrixty_options["outbox_position"] ){
-					$div_attrs["outbox_position"] = $thrixty_options["outbox_position"];
-				}
-				/* position_indicator */
-				if( !!$atts["position_indicator"] ){
-					$div_attrs["position_indicator"] = $atts["position_indicator"];
-				} else if( !!$thrixty_options["position_indicator"] ){
-					$div_attrs["position_indicator"] = $thrixty_options["position_indicator"];
-				}
-				/* zoom_control */
-				if( !!$atts["zoom_control"] ){
-					$div_attrs["zoom_control"] = $atts["zoom_control"];
-				} else if( !!$thrixty_options["zoom_control"] ){
-					$div_attrs["zoom_control"] = $thrixty_options["zoom_control"];
-				}
-				/* direction */
-				if( !!$atts["direction"] ){
-					$div_attrs["direction"] = $atts["direction"];
-				} else if( !!$thrixty_options["direction"] ){
-					$div_attrs["direction"] = $thrixty_options["direction"];
-				}
-				/* cycle_duration */
-				if( !!$atts["cycle_duration"] ){
-					$div_attrs["cycle_duration"] = $atts["cycle_duration"];
-				} else if( !!$thrixty_options["cycle_duration"] ){
-					$div_attrs["cycle_duration"] = $thrixty_options["cycle_duration"];
-				}
-				/* sensitivity_x */
-				if( !!$atts["sensitivity_x"] ){
-					$div_attrs["sensitivity_x"] = $atts["sensitivity_x"];
-				} else if( !!$thrixty_options["sensitivity_x"] ){
-					$div_attrs["sensitivity_x"] = $thrixty_options["sensitivity_x"];
-				}
-				/* autoload */
-				if( !!$atts["autoload"] ){
-					$div_attrs["autoload"] = $atts["autoload"];
-				} else if( !!$thrixty_options["autoload"] ){
-					$div_attrs["autoload"] = $thrixty_options["autoload"];
-				}
-				/* autoplay */
-				if( !!$atts["autoplay"] ){
-					$div_attrs["autoplay"] = $atts["autoplay"];
-				} else if( !!$thrixty_options["autoplay"] ){
-					$div_attrs["autoplay"] = $thrixty_options["autoplay"];
-				}
+		/* zoom_mode */
+			if( !!$atts["zoom_mode"] ){
+				$div_attrs["zoom_mode"] = $atts["zoom_mode"];
+			} else if( !!$thrixty_options["zoom_mode"] ){
+				$div_attrs["zoom_mode"] = $thrixty_options["zoom_mode"];
 			}
-		}
-
+		/* outbox_position */
+			if( !!$atts["outbox_position"] ){
+				$div_attrs["outbox_position"] = $atts["outbox_position"];
+			} else if( !!$thrixty_options["outbox_position"] ){
+				$div_attrs["outbox_position"] = $thrixty_options["outbox_position"];
+			}
+		/* position_indicator */
+			if( !!$atts["position_indicator"] ){
+				$div_attrs["position_indicator"] = $atts["position_indicator"];
+			} else if( !!$thrixty_options["position_indicator"] ){
+				$div_attrs["position_indicator"] = $thrixty_options["position_indicator"];
+			}
+		/* zoom_control */
+			if( !!$atts["zoom_control"] ){
+				$div_attrs["zoom_control"] = $atts["zoom_control"];
+			} else if( !!$thrixty_options["zoom_control"] ){
+				$div_attrs["zoom_control"] = $thrixty_options["zoom_control"];
+			}
+		/* direction */
+			if( !!$atts["direction"] ){
+				$div_attrs["direction"] = $atts["direction"];
+			} else if( !!$thrixty_options["direction"] ){
+				$div_attrs["direction"] = $thrixty_options["direction"];
+			}
+		/* cycle_duration */
+			if( !!$atts["cycle_duration"] ){
+				$div_attrs["cycle_duration"] = $atts["cycle_duration"];
+			} else if( !!$thrixty_options["cycle_duration"] ){
+				$div_attrs["cycle_duration"] = $thrixty_options["cycle_duration"];
+			}
+		/* sensitivity_x */
+			if( !!$atts["sensitivity_x"] ){
+				$div_attrs["sensitivity_x"] = $atts["sensitivity_x"];
+			} else if( !!$thrixty_options["sensitivity_x"] ){
+				$div_attrs["sensitivity_x"] = $thrixty_options["sensitivity_x"];
+			}
+		/* autoload */
+			if( !!$atts["autoload"] ){
+				$div_attrs["autoload"] = $atts["autoload"];
+			} else if( !!$thrixty_options["autoload"] ){
+				$div_attrs["autoload"] = $thrixty_options["autoload"];
+			}
+		/* autoplay */
+			if( !!$atts["autoplay"] ){
+				$div_attrs["autoplay"] = $atts["autoplay"];
+			} else if( !!$thrixty_options["autoplay"] ){
+				$div_attrs["autoplay"] = $thrixty_options["autoplay"];
+			}
 		/* Build the Thrixty Div. */
-		$returning = "<div ";
-			$returning .= "id=\"thrixty_box_$player_counter\" "; /* this is, what the global counter is for */
-			$returning .= "class=\"thrixty-player\" ";
-			$returning .= "tabindex=\"$player_counter\" "; /* this is, what the global counter is for */
-			/* Convert attributes array to actual HTML-attributes on the div. */
-			foreach( $div_attrs as $key => $value ){
-				/* Wordpress's shortcodes cant stand hyphens... */
-				/* So we use underscores and translate them back into hypens later. */
-				$returning .= "thrixty-".str_replace("_", "-", $key)."=\"$value\" ";
-			}
-		$returning .= "></div>";
+			$returning = "<div ";
+				$returning .= "id=\"thrixty_box_$player_counter\" "; /* this is, what the global counter is for */
+				$returning .= "class=\"thrixty-player\" ";
+				$returning .= "tabindex=\"$player_counter\" "; /* this is, what the global counter is for */
+				/* Convert attributes array to actual HTML-attributes on the div. */
+				foreach( $div_attrs as $key => $value ){
+					/* Wordpress's shortcodes cant stand hyphens... */
+					/* So we use underscores and translate them back into hypens later. */
+					$returning .= "thrixty-".str_replace("_", "-", $key)."=\"$value\" ";
+				}
+			$returning .= "></div>";
 		$player_counter += 1;
 		return $returning;
 	}
@@ -376,14 +351,27 @@
 			?>
 			<div class="wrap">
 				<h2>Thrixty Player - Allgemeine Einstellungen</h2>
-				<p>Hier k&ouml;nnen Sie allgemeine Standardwerte festlegen.</p>
+				<hr>
+				<h3>Bitte lesen Sie diese <u>Seiteninformationen</u>, bevor Sie hier Einstellungen vornehmen!</h3>
+				<p>
+					Dieses Plugin arbeitet mit <b><i>Wordpress-Shortcodes</i></b> und generiert daraus Instanzen des Thrixtys.<br>
+					<br>
+					Der Thrixty selbst hat eigene <b><i>Standardeinstellungen</i></b>.<br>
+					Diese können <b><i>von den Plugineinstellungen &uuml;berschrieben</i></b> werden, sofern sie gesetzt wurden.<br>
+					Alle speziell <b><i>im Shortcode angebenen Parameter &uuml;berschreiben alle anderen Einstellungen</i></b>.<br>
+					<br>
+					Die allgemeinen Einstellungen auf dieser Seite sind daf&uuml;r gedacht, alle Objekte auf Ihrer Seite gleich darzustellen.<br>
+					Sie sollten dabei darauf achten, <b><i>so wenige Einstellungen wie m&ouml;glich zu setzen</i></b>!<br>
+					<br>
+					Die Generierung der Shortcodes geschieht &uuml;ber das 360Shots Logo im Beitragseditor (visuell).<br>
+					<br>
+					Wir raten Ihnen dringend, dass Sie Ihre <b><i>Animationen in einem zentralen Ordner</i></b> ablegen, auf den Sie dann in der Einstellung "Basepath" verweisen!<br>
+					Hier wurde als Standardeinstellung angenommen, dass Sie sie in <b>"[root]/360shots_objekte/"</b> ablegen.<br>
+					<br>
+				</p>
+				<hr>
 				<form action="options.php" method="post">
 					<?php settings_fields('thrixty_options'); ?>
-					<!--TODO: tooltip oder so-->
-					<b>Bitte lesen Sie die <a href="#pageinfo">Seiteninformationen</a>, bevor Sie hier Einstellungen vornehmen!</b>
-					<p>
-						Nicht gef&uuml;llte Felder greifen auf die Standardwerte des Thrixtyplayers selbst zurück.
-					</p>
 					<style>
 						#thrixty_settings_table td{
 							vertical-align: top;
@@ -417,21 +405,21 @@
 						<tr>
 							<td>Filelist Path Small</td>
 							<td>
-								<input id='plugin_filelist_path_small' name='thrixty_options[filelist_path_small]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['filelist_path_small']; ?>' />
+								<input id='plugin_filelist_path_small' name='thrixty_options[filelist_path_small]' size='40' type='text' placeholder='[Thrixty Standard] small/Filelist.txt' value='<?php echo $thrixty_options['filelist_path_small']; ?>' />
 							</td>
 							<!--<td>filelist_path_small</td>-->
 						</tr>
 						<tr>
 							<td>Filelist Path Large</td>
 							<td>
-								<input id='plugin_filelist_path_large' name='thrixty_options[filelist_path_large]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['filelist_path_large']; ?>' />
+								<input id='plugin_filelist_path_large' name='thrixty_options[filelist_path_large]' size='40' type='text' placeholder='[Thrixty Standard] large/Filelist.txt' value='<?php echo $thrixty_options['filelist_path_large']; ?>' />
 							</td>
 							<!--<td>filelist_path_large</td>-->
 						</tr>
 						<tr>
 							<td>Zoom Mode</td>
 							<td>
-								<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['zoom_mode']; ?>' />
+								<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' placeholder='[Thrixty Standard] inbox' value='<?php echo $thrixty_options['zoom_mode']; ?>' />
 							</td>
 							<td>
 								Hier kann die Zoom Art gew&auml;hlt werden.<br>
@@ -445,7 +433,7 @@
 						<tr>
 							<td>Outbox Position</td>
 							<td>
-								<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['outbox_position']; ?>' />
+								<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' placeholder='[Thrixty Standard] right' value='<?php echo $thrixty_options['outbox_position']; ?>' />
 							</td>
 							<td>
 								Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
@@ -456,7 +444,7 @@
 						<tr>
 							<td>Position Indicator</td>
 							<td>
-								<input id='plugin_position_indicator' name='thrixty_options[position_indicator]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['position_indicator']; ?>' />
+								<input id='plugin_position_indicator' name='thrixty_options[position_indicator]' size='40' type='text' placeholder='[Thrixty Standard] minimap' value='<?php echo $thrixty_options['position_indicator']; ?>' />
 							</td>
 							<td>
 								Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
@@ -469,7 +457,7 @@
 						<tr>
 							<td>Zoom Control</td>
 							<td>
-								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['zoom_control']; ?>' />
+								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard] progressive' value='<?php echo $thrixty_options['zoom_control']; ?>' />
 							</td>
 							<td>
 								Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
@@ -482,7 +470,7 @@
 						<tr>
 							<td>Direction</td>
 							<td>
-								<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['direction']; ?>' />
+								<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' placeholder='[Thrixty Standard] forward' value='<?php echo $thrixty_options['direction']; ?>' />
 							</td>
 							<td>
 								Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
@@ -498,7 +486,7 @@
 						<tr>
 							<td>Cycle Duration</td>
 							<td>
-								<input id='plugin_cycle_duration' name='thrixty_options[cycle_duration]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['cycle_duration']; ?>' />
+								<input id='plugin_cycle_duration' name='thrixty_options[cycle_duration]' size='40' type='text' placeholder='[Thrixty Standard] 5' value='<?php echo $thrixty_options['cycle_duration']; ?>' />
 							</td>
 							<td>
 								Dies ist die Zeit, die eine ganze Umdrehung dauern soll. Dies sollte f&uuml;r alle Objekte gleich sein, um Gleichm&auml;&szlig;igkeit &uuml;ber die ganze Seite zu gew&auml;hrleisten.<br>
@@ -511,7 +499,7 @@
 						<tr>
 							<td>Sensitivity X</td>
 							<td>
-								<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['sensitivity_x']; ?>' />
+								<input id='plugin_sensitivity_x' name='thrixty_options[sensitivity_x]' size='40' type='text' placeholder='[Thrixty Standard] 20' value='<?php echo $thrixty_options['sensitivity_x']; ?>' />
 							</td>
 							<td>
 								Dies ist die Anzahl an Pixeln, ab welcher Distanz ein angefangener Klick als Geste z&auml;hlt.<br>
@@ -522,7 +510,7 @@
 						<tr>
 							<td>Autoload</td>
 							<td>
-								<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['autoload']; ?>' />
+								<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' placeholder='[Thrixty Standard] on' value='<?php echo $thrixty_options['autoload']; ?>' />
 							</td>
 							<td>
 								Diese Option gibt an, ob die Player automatisch ihre Bilder laden sollen.<br>
@@ -534,7 +522,7 @@
 						<tr>
 							<td>Autoplay</td>
 							<td>
-								<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' placeholder='[Thrixty Standard]' value='<?php echo $thrixty_options['autoplay']; ?>' />
+								<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' placeholder='[Thrixty Standard] infinite' value='<?php echo $thrixty_options['autoplay']; ?>' />
 							</td>
 							<td>
 								Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
@@ -548,34 +536,10 @@
 				</form>
 				<br>
 				<hr>
-				<h3 id="pageinfo">Seiteninformationen</h3>
-				<p>
-					&Uuml;ber den "3D" Button im Artikel Editor (visuell) k&ouml;nnen Sie einen Shortcode generieren.<br>
-					Alle im <b><i>Shortcode</i></b> angegebenen Optionen <b><i>&uuml;berschreiben</i></b> die allgemeinen Einstellungen, die sie hier t&auml;tigen.<br>
-					Die allgemeinen Einstellungen sind daf&uuml;r gedacht, <b><i>alle Objekte auf Ihrer Seite gleich darzustellen.</i></b><br>
-				</p>
-				<p>
-					Wenn es f&uuml;r eine Option keinen allgemeing&uuml;ltigen Wert gibt (Feld leer lassen), dann wird die Option bei der Shortcodegenerierug abgefragt.<br>
-					Dies wird mit den beiden Optionen <b>thrixtyplayer-filelist-path-small</b> und <b>thrixtyplayer-filelist-path-large</b> immer passieren!<br>
-				</p>
-				<p>
-					Die allgemeinen Einstellungen sind vor allem dann hilfreich, wenn alle Ihre f&uuml;r den Player ben&ouml;tigten Listen im selben Grundordner liegen (empfohlen).<br>
-				</p>
-				<br>
-				<p>
-					Ein typischer Thrixty Shortcode:<br>
-					<b>[thrixty object_name="example" ]</b><br>
-					Die Player-Generierung fällt bei nicht angebenen Werten auf die Einstellungen dieser Seite zurück.<br>
-					Sollten diese nicht gesetzt worden sein, kann es passieren, dass der Player die entsprechenden Bilddateien nicht findet.<br>
-				</p>
-				<hr>
 				<h3>Error Sektion</h3>
 				<p>
-					&gt;&gt;&gt; Beschriebungen hier &lt;&lt;&lt;
+					&gt;&gt;&gt; Beschreibungen hier &lt;&lt;&lt;
 				</p>
-				<h3 id="paraminfo">Erkl&auml;rung der Parameter und ihrer Werte</h3>
-				[Hier waren die Beschreibungen]
-				<br>
 				<hr>
 				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
 				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
@@ -675,9 +639,6 @@
 					/// filelist small and large paths
 						if( isset($old_sc_atts["object"]) && $old_sc_atts["object"] != "" ){
 							$new_shortcode .= "object_name='".$old_sc_atts["object"]."' ";
-							// TODO: if these paths are the same as in settings, do not append to the shortcode
-							$new_shortcode .= "filelist_path_small='small/Filelist.txt' ";
-							$new_shortcode .= "filelist_path_large='large/Filelist.txt' ";
 						}
 					/// direction
 						if( isset($old_sc_atts["direction"]) && $old_sc_atts["direction"] != "" ){
