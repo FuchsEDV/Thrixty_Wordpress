@@ -1,19 +1,20 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player 1.6.1
+	 * Plugin Name: Thrixty Player dev2.0.0
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 1.6.1
+	 * Version: dev2.0.0
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 1.6.1
+	 * @version dev2.0.0
 	 */
+
 
 
 	/**
@@ -75,8 +76,6 @@
 
 
 
-
-
 	/**
 	 * Frontend Scripts and Styles
 	 *
@@ -96,8 +95,11 @@
 		// This global is counting the number of initialized Players.
 		$player_counter = 0;
 		// the following script loads all dependencies automatically
-		wp_enqueue_script('thrixty_init', plugins_url("thrixty_base/thrixty_init.js", __FILE__));
+		wp_enqueue_script('thrixty_init_js', plugins_url("thrixty_base/thrixty.js", __FILE__));
+		wp_enqueue_style('thrixty_init_css', plugins_url("thrixty_base/thrixty.css", __FILE__));
 	}
+
+
 
 	/**
 	 * Shortcode Generator Button for TinyMCE
@@ -273,7 +275,7 @@
 		/* Build the Thrixty Div. */
 			$returning = "<div ";
 				$returning .= "id=\"thrixty_box_$player_counter\" "; /* this is, what the global counter is for */
-				$returning .= "class=\"thrixty-player\" ";
+				$returning .= "class=\"thrixty\" ";
 				$returning .= "tabindex=\"$player_counter\" "; /* this is, what the global counter is for */
 				/* Convert attributes array to actual HTML-attributes on the div. */
 				foreach( $div_attrs as $key => $value ){
@@ -285,9 +287,6 @@
 		$player_counter += 1;
 		return $returning;
 	}
-
-
-
 
 
 
@@ -308,6 +307,9 @@
 	function thrixty_admin_init(){
 		register_setting( 'thrixty_options', 'thrixty_options');
 	}
+
+
+
 	/**
 	 * Thrixty Player Settings Page for Admin Backend
 	 *
@@ -559,6 +561,9 @@
 				</form>
 			</div><?php
 		}
+
+
+
 		/**
 		 * Thrixty Player Settings Shortcode Converter
 		 *
