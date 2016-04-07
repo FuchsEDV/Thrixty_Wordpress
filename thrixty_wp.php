@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player dev2.0.0
+	 * Plugin Name: Thrixty Player 2.0.0
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: dev2.0.0
+	 * Version: 2.0.0
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version dev2.0.0
+	 * @version 2.0.0
 	 */
 
 
@@ -40,15 +40,15 @@
 					"basepath" => "__SITE__/360shots_objekte/", // player standard: ""
 					"filelist_path_small" => "", // player standard: "small/Filelist.txt"
 					"filelist_path_large" => "", // player standard: "large/Filelist.txt"
-					"zoom_mode" => "", // player standard: inbox
-					"outbox_position" => "", // player standard: right
-					"position_indicator" => "", // player standard: minimap
 					"zoom_control" => "", // player standard: progressive
-					"direction" => "", // player standard: forward
+					"zoom_mode" => "", // player standard: inbox
+					"zoom_pointer" => "", // player standard: minimap
+					"outbox_position" => "", // player standard: right
+					"reversion" => "", // player standard: false
 					"cycle_duration" => "", // player standard: 5
 					"sensitivity_x" => "", // player standard: 20
-					"autoload" => "", // player standard: on
 					"autoplay" => "", //  // player standard: -1 / infinite
+					"autoload" => "", // player standard: on
 				)
 			);
 		}
@@ -147,15 +147,15 @@
 							// "object_name" => "",
 							"filelist_path_small" => $thrixty_options["filelist_path_small"] ? : "small/Filelist.txt",
 							"filelist_path_large" => $thrixty_options["filelist_path_large"] ? : "large/Filelist.txt",
-							// "zoom_mode" => $thrixty_options["zoom_mode"],
-							// "outbox_position" => $thrixty_options["outbox_position"],
-							// "position_indicator" => $thrixty_options["position_indicator"],
 							// "zoom_control" => $thrixty_options["zoom_control"],
-							// "direction" => $thrixty_options["direction"],
+							// "zoom_mode" => $thrixty_options["zoom_mode"],
+							// "zoom_pointer" => $thrixty_options["zoom_pointer"],
+							// "outbox_position" => $thrixty_options["outbox_position"],
+							// "reversion" => $thrixty_options["reversion"],
 							// "cycle_duration" => $thrixty_options["cycle_duration"],
 							// "sensitivity_x" => $thrixty_options["sensitivity_x"],
-							// "autoload" => $thrixty_options["autoload"],
 							// "autoplay" => $thrixty_options["autoplay"],
+							// "autoload" => $thrixty_options["autoload"],
 						);
 						// JSON en- and de-coding to translate PHP hash into JS object
 						?><script>
@@ -218,11 +218,23 @@
 			} else if( !!$thrixty_options["filelist_path_large"] ){
 				$div_attrs["filelist_path_large"] = $thrixty_options["filelist_path_large"];
 			}
+		/* zoom_control */
+			if( !!$atts["zoom_control"] ){
+				$div_attrs["zoom_control"] = $atts["zoom_control"];
+			} else if( !!$thrixty_options["zoom_control"] ){
+				$div_attrs["zoom_control"] = $thrixty_options["zoom_control"];
+			}
 		/* zoom_mode */
 			if( !!$atts["zoom_mode"] ){
 				$div_attrs["zoom_mode"] = $atts["zoom_mode"];
 			} else if( !!$thrixty_options["zoom_mode"] ){
 				$div_attrs["zoom_mode"] = $thrixty_options["zoom_mode"];
+			}
+		/* zoom_pointer */
+			if( !!$atts["zoom_pointer"] ){
+				$div_attrs["zoom_pointer"] = $atts["zoom_pointer"];
+			} else if( !!$thrixty_options["zoom_pointer"] ){
+				$div_attrs["zoom_pointer"] = $thrixty_options["zoom_pointer"];
 			}
 		/* outbox_position */
 			if( !!$atts["outbox_position"] ){
@@ -230,23 +242,11 @@
 			} else if( !!$thrixty_options["outbox_position"] ){
 				$div_attrs["outbox_position"] = $thrixty_options["outbox_position"];
 			}
-		/* position_indicator */
-			if( !!$atts["position_indicator"] ){
-				$div_attrs["position_indicator"] = $atts["position_indicator"];
-			} else if( !!$thrixty_options["position_indicator"] ){
-				$div_attrs["position_indicator"] = $thrixty_options["position_indicator"];
-			}
-		/* zoom_control */
-			if( !!$atts["zoom_control"] ){
-				$div_attrs["zoom_control"] = $atts["zoom_control"];
-			} else if( !!$thrixty_options["zoom_control"] ){
-				$div_attrs["zoom_control"] = $thrixty_options["zoom_control"];
-			}
-		/* direction */
-			if( !!$atts["direction"] ){
-				$div_attrs["direction"] = $atts["direction"];
-			} else if( !!$thrixty_options["direction"] ){
-				$div_attrs["direction"] = $thrixty_options["direction"];
+		/* reversion */
+			if( !!$atts["reversion"] ){
+				$div_attrs["reversion"] = $atts["reversion"];
+			} else if( !!$thrixty_options["reversion"] ){
+				$div_attrs["reversion"] = $thrixty_options["reversion"];
 			}
 		/* cycle_duration */
 			if( !!$atts["cycle_duration"] ){
@@ -260,17 +260,17 @@
 			} else if( !!$thrixty_options["sensitivity_x"] ){
 				$div_attrs["sensitivity_x"] = $thrixty_options["sensitivity_x"];
 			}
-		/* autoload */
-			if( !!$atts["autoload"] ){
-				$div_attrs["autoload"] = $atts["autoload"];
-			} else if( !!$thrixty_options["autoload"] ){
-				$div_attrs["autoload"] = $thrixty_options["autoload"];
-			}
 		/* autoplay */
 			if( !!$atts["autoplay"] ){
 				$div_attrs["autoplay"] = $atts["autoplay"];
 			} else if( !!$thrixty_options["autoplay"] ){
 				$div_attrs["autoplay"] = $thrixty_options["autoplay"];
+			}
+		/* autoload */
+			if( !!$atts["autoload"] ){
+				$div_attrs["autoload"] = $atts["autoload"];
+			} else if( !!$thrixty_options["autoload"] ){
+				$div_attrs["autoload"] = $thrixty_options["autoload"];
 			}
 		/* Build the Thrixty Div. */
 			$returning = "<div ";
@@ -419,6 +419,19 @@
 							<!--<td>filelist_path_large</td>-->
 						</tr>
 						<tr>
+							<td>Zoom Control</td>
+							<td>
+								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard] progressive' value='<?php echo $thrixty_options['zoom_control']; ?>' />
+							</td>
+							<td>
+								Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
+								Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
+								Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
+								M&ouml;gliche Werte:<br>
+								<b>progressive</b>, classic<br>
+							</td>
+						</tr>
+						<tr>
 							<td>Zoom Mode</td>
 							<td>
 								<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' placeholder='[Thrixty Standard] inbox' value='<?php echo $thrixty_options['zoom_mode']; ?>' />
@@ -433,6 +446,19 @@
 							</td>
 						</tr>
 						<tr>
+							<td>Zoom Pointer</td>
+							<td>
+								<input id='plugin_zoom_pointer' name='thrixty_options[zoom_pointer]' size='40' type='text' placeholder='[Thrixty Standard] minimap' value='<?php echo $thrixty_options['zoom_pointer']; ?>' />
+							</td>
+							<td>
+								Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
+								Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
+								Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
+								M&ouml;gliche Werte:<br>
+								<b>minimap</b>, marker, none<br>
+							</td>
+						</tr>
+						<tr>
 							<td>Outbox Position</td>
 							<td>
 								<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' placeholder='[Thrixty Standard] right' value='<?php echo $thrixty_options['outbox_position']; ?>' />
@@ -444,44 +470,16 @@
 							</td>
 						</tr>
 						<tr>
-							<td>Position Indicator</td>
+							<td>Reversion</td>
 							<td>
-								<input id='plugin_position_indicator' name='thrixty_options[position_indicator]' size='40' type='text' placeholder='[Thrixty Standard] minimap' value='<?php echo $thrixty_options['position_indicator']; ?>' />
+								<input id='plugin_reversion' name='thrixty_options[reversion]' size='40' type='text' placeholder='[Thrixty Standard] forward' value='<?php echo $thrixty_options['reversion']; ?>' />
 							</td>
 							<td>
-								Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
-								Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
-								Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
-								M&ouml;gliche Werte:<br>
-								<b>minimap</b>, marker, none<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Zoom Control</td>
-							<td>
-								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard] progressive' value='<?php echo $thrixty_options['zoom_control']; ?>' />
-							</td>
-							<td>
-								Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
-								Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
-								Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
-								M&ouml;gliche Werte:<br>
-								<b>progressive</b>, classic<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Direction</td>
-							<td>
-								<input id='plugin_direction' name='thrixty_options[direction]' size='40' type='text' placeholder='[Thrixty Standard] forward' value='<?php echo $thrixty_options['direction']; ?>' />
-							</td>
-							<td>
-								Dies ist die Richtung, in die sich die Objekte drehen sollen.<br>
-								Objekte, die sich im Uhrzeigersinn drehen, werden <b>"forward"</b> drehend genannt.<br>
-								Objekte, die sich gegen den Uhrzeigersinn drehen, werden "backward" drehend genannt.<br>
-								<b>Sie sollten Ihre Aufnahmen immer in diesselbe Richtung drehend aufnehmen!</b><br>
-								Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "backward".<br>
-								<?php if( isset($box3d_options["direction"]) ){ ?>
-									Der alte Wert aus Box3D: <b><?php echo $box3d_options["direction"]; ?></b><br>
+								Diese Option ermöglicht Ihnen, die Animation an die Maus/Berührungs-Steuerung anzupassen.<br>
+								<b>Sie sollten Ihre Aufnahmen immer im Uhrzeigersinn drehend aufnehmen!</b><br>
+								Falls Sie Ihre Aufnahmen bereits gegen den Uhrzeigersinn aufgenommen haben, stellen Sie diese Option um auf "true".<br>
+								<?php if( isset($box3d_options["reversion"]) ){ ?>
+									Der alte Wert aus Box3D: <b><?php echo $box3d_options["reversion"]; ?></b><br>
 								<? } ?>
 							</td>
 						</tr>
@@ -510,6 +508,17 @@
 							</td>
 						</tr>
 						<tr>
+							<td>Autoplay</td>
+							<td>
+								<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' placeholder='[Thrixty Standard] infinite' value='<?php echo $thrixty_options['autoplay']; ?>' />
+							</td>
+							<td>
+								Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
+								M&ouml;gliche Werte:<br>
+								<b>first</b>, all_on, all_off<br>
+							</td>
+						</tr>
+						<tr>
 							<td>Autoload</td>
 							<td>
 								<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' placeholder='[Thrixty Standard] on' value='<?php echo $thrixty_options['autoload']; ?>' />
@@ -519,17 +528,6 @@
 								Auf Mobil-geräten wird diese Option vom Thrixty ignoriert und niemals Bilder automatisch geladen.</b>
 								M&ouml;gliche Werte:<br>
 								<b>on</b>, off<br>
-							</td>
-						</tr>
-						<tr>
-							<td>Autoplay</td>
-							<td>
-								<input id='plugin_autoplay' name='thrixty_options[autoplay]' size='40' type='text' placeholder='[Thrixty Standard] infinite' value='<?php echo $thrixty_options['autoplay']; ?>' />
-							</td>
-							<td>
-								Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
-								M&ouml;gliche Werte:<br>
-								<b>first</b>, all_on, all_off<br>
 							</td>
 						</tr>
 					</table>
@@ -647,7 +645,7 @@
 						}
 					/// direction
 						if( isset($old_sc_atts["direction"]) && $old_sc_atts["direction"] != "" ){
-							$new_shortcode .= "direction='".$old_sc_atts["direction"]."' ";
+							$new_shortcode .= "reversion='".$old_sc_atts["direction"]."' ";
 						}
 					$new_shortcode .= "]";
 
@@ -665,7 +663,7 @@
 			}
 		}
 
-	// /
+	// /thrixty settings page
 
 
 

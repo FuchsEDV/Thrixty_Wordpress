@@ -22,16 +22,15 @@ If you need some example files, download the "example"-folder from [here](https:
 ### 3.) Installation
 * Download, unpack and activate this Plugin.
 * In the Wordpress-backend go to Settings -> Thrixty Player
-* Read the description underneath the Options, to know what the options are and what they are doing.
-* When generating Shortcodes, you will be asked for the not set Options. Do yourself a favor and fill all of them. (When serving many pictures, it is good to set up a designated server.)
+* Read the description to the Options, to know what the options are and what they are doing. (At the moment the plugin is only available in german.)
 * Save your Options.
-* Create a new unpublished page, so you can privately examine, how this Plugin works.
+* Create a new unpublished page, so you can privately examine how this Plugin works.
 * In the TinyMCE Editor should now be a new Button. It is blue and shows the 360Shots Logo.
 * Press this and fill in the blanks. Options that you already set, are overwriteable, in case you need specific settings.
-* After pressing "Generate" you should see a Shortcode like this: `[thrixty filelist_path_small="small_example.txt" filelist_path_large="large_example.txt" ]`
+* After pressing "Generate" you should see a Shortcode like this: `[thrixty basepath="example" (...)]`
 * Save the Changes and preview the Page.
 * At this point you should propably have something like "Firebug" (for Firefox) installed. There are different programs for each Browser. In case something went wrong, you need to be able to view your console, as Thrixty logs its errors in there.
-* When everything went good, you should now look at your rotating object. Read further on how to use.
+* When everything went good, you should now look at your rotating object.
 
 ### 4.) Usage
 ######Mouse/Touch:
@@ -53,21 +52,23 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
+* V2.0.0:
+	* Update to Thrixty Version 2.0.0
 * V1.6.1:
-	* TinyMCE-Extension extended.
+	* TinyMCE-Extension extended
 	* Update to Thrixty Version 1.6.1
 * V1.6:
-	* Update to Thrixty Version 1.6.
+	* Update to Thrixty Version 1.6
 * V1.5.1:
-	* Support of newest Thrixty Version 1.5.1.
+	* Support of newest Thrixty Version 1.5.1
 * V1.0 (Release):
-    * Automatic embedding of base files.
-    * Shortcode Generator.
-    * Central Settings.
+    * Automatic embedding of base files
+    * Shortcode Generator
+    * Central Settings
 
 ### 6.) Planned Features and Changes
 * l18n - Translate backend language to english with an OPTION for german.
-* Change the setting fields to textfield, radiobutton and dropdown respectively.
+* Change the setting fields to textfield, radiobutton, checkbox and dropdown respectively.
 
 ### 7.) License
 ```txt

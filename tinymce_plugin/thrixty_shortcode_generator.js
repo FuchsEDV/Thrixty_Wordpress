@@ -79,12 +79,32 @@ jQuery(document).ready(function(){
 						stuff += "</tr>";
 						stuff += "<tr><td colspan='2'><hr></td></tr>";
 						stuff += "<tr>";
+							stuff += "<td><label for='zoom_control'>zoom_control</label></td>";
+							stuff += "<td>";
+								stuff += "<select id='zoom_control' name='zoom_control'>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='progressive' >Progressive</option>";
+									stuff += "<option value='classic'>Classic</option>";
+								stuff += "</select>";
+							stuff += "</td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
 							stuff += "<td><label for='zoom_mode'>zoom_mode</label></td>";
 							stuff += "<td>";
 								stuff += "<select id='zoom_mode' name='zoom_mode'>";
 									stuff += "<option value='' selected>[Standard]</option>";
 									stuff += "<option value='inbox'>Inbox</option>";
 									stuff += "<option value='outbox'>Outbox</option>";
+								stuff += "</select>";
+							stuff += "</td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
+							stuff += "<td><label for='zoom_pointer'>zoom_pointer</label></td>";
+							stuff += "<td>";
+								stuff += "<select id='zoom_pointer' name='zoom_pointer'>";
+									stuff += "<option value='' selected>[Standard]</option>";
+									stuff += "<option value='minimap'>Minimap</option>";
+									stuff += "<option value='marker'>Marker</option>";
 								stuff += "</select>";
 							stuff += "</td>";
 						stuff += "</tr>";
@@ -101,32 +121,12 @@ jQuery(document).ready(function(){
 							stuff += "</td>";
 						stuff += "</tr>";
 						stuff += "<tr>";
-							stuff += "<td><label for='position_indicator'>position_indicator</label></td>";
+							stuff += "<td><label for='reversion'>reversion</label></td>";
 							stuff += "<td>";
-								stuff += "<select id='position_indicator' name='position_indicator'>";
+								stuff += "<select id='reversion' name='reversion'>";
 									stuff += "<option value='' selected>[Standard]</option>";
-									stuff += "<option value='minimap'>Minimap</option>";
-									stuff += "<option value='marker'>Marker</option>";
-								stuff += "</select>";
-							stuff += "</td>";
-						stuff += "</tr>";
-						stuff += "<tr>";
-							stuff += "<td><label for='zoom_control'>zoom_control</label></td>";
-							stuff += "<td>";
-								stuff += "<select id='zoom_control' name='zoom_control'>";
-									stuff += "<option value='' selected>[Standard]</option>";
-									stuff += "<option value='progressive' >Progressive</option>";
-									stuff += "<option value='classic'>Classic</option>";
-								stuff += "</select>";
-							stuff += "</td>";
-						stuff += "</tr>";
-						stuff += "<tr>";
-							stuff += "<td><label for='direction'>direction</label></td>";
-							stuff += "<td>";
-								stuff += "<select id='direction' name='direction'>";
-									stuff += "<option value='' selected>[Standard]</option>";
-									stuff += "<option value='forward'>Forward</option>";
-									stuff += "<option value='backward'>Backward</option>";
+									stuff += "<option value='false'>Off</option>";
+									stuff += "<option value='true'>On</option>";
 								stuff += "</select>";
 							stuff += "</td>";
 						stuff += "</tr>";
@@ -139,6 +139,10 @@ jQuery(document).ready(function(){
 							stuff += "<td><input id='sensitivity_x' name='sensitivity_x' type='number' min='0' placeholder='[Standard]' /></td>";
 						stuff += "</tr>";
 						stuff += "<tr>";
+							stuff += "<td><label for='autoplay'>autoplay</label></td>";
+							stuff += "<td><input id='autoplay' name='autoplay' type='number' min='-1' placeholder='[Standard]' /></td>";
+						stuff += "</tr>";
+						stuff += "<tr>";
 							stuff += "<td><label for='autoload'>autoload</label></td>";
 							stuff += "<td>";
 								stuff += "<select id='autoload' name='autoload'>";
@@ -147,10 +151,6 @@ jQuery(document).ready(function(){
 									stuff += "<option value='off'>Off</option>";
 								stuff += "</select>";
 							stuff += "</td>";
-						stuff += "</tr>";
-						stuff += "<tr>";
-							stuff += "<td><label for='autoplay'>autoplay</label></td>";
-							stuff += "<td><input id='autoplay' name='autoplay' type='number' min='-1' placeholder='[Standard]' /></td>";
 						stuff += "</tr>";
 						stuff += "<tr>";
 							stuff += "<td><button type='button' id='close' style='background:red;'>Cancel</button></td>";
@@ -228,9 +228,19 @@ jQuery(document).ready(function(){
 									content += "filelist_path_large=\""+current_elem.value+"\" ";
 								}
 								break;
+							case "zoom_control":
+								if( current_elem.value != "" ){
+									content += "zoom_control=\""+current_elem.value+"\" ";
+								}
+								break;
 							case "zoom_mode":
 								if( current_elem.value != "" ){
 									content += "zoom_mode=\""+current_elem.value+"\" ";
+								}
+								break;
+							case "zoom_pointer":
+								if( current_elem.value != "" ){
+									content += "zoom_pointer=\""+current_elem.value+"\" ";
 								}
 								break;
 							case "outbox_position":
@@ -238,19 +248,9 @@ jQuery(document).ready(function(){
 									content += "outbox_position=\""+current_elem.value+"\" ";
 								}
 								break;
-							case "position_indicator":
+							case "reversion":
 								if( current_elem.value != "" ){
-									content += "position_indicator=\""+current_elem.value+"\" ";
-								}
-								break;
-							case "zoom_control":
-								if( current_elem.value != "" ){
-									content += "zoom_control=\""+current_elem.value+"\" ";
-								}
-								break;
-							case "direction":
-								if( current_elem.value != "" ){
-									content += "direction=\""+current_elem.value+"\" ";
+									content += "reversion=\""+current_elem.value+"\" ";
 								}
 								break;
 							case "cycle_duration":
@@ -263,14 +263,14 @@ jQuery(document).ready(function(){
 									content += "sensitivity_x=\""+current_elem.value+"\" ";
 								}
 								break;
-							case "autoload":
-								if( current_elem.value != "" ){
-									content += "autoload=\""+current_elem.value+"\" ";
-								}
-								break;
 							case "autoplay":
 								if( current_elem.value != "" ){
 									content += "autoplay=\""+current_elem.value+"\" ";
+								}
+								break;
+							case "autoload":
+								if( current_elem.value != "" ){
+									content += "autoload=\""+current_elem.value+"\" ";
 								}
 								break;
 							default:
@@ -305,12 +305,16 @@ jQuery(document).ready(function(){
 
 						var path_small = basepath;
 						var path_large = basepath;
+
 							path_small += path_small.charAt(path_small.length-1) === "/" ? "" : "/";
 							path_large += path_large.charAt(path_large.length-1) === "/" ? "" : "/";
+
 							path_small += object_name;
 							path_large += object_name;
+
 							path_small += path_small.charAt(path_small.length-1) === "/" ? "" : "/";
 							path_large += path_large.charAt(path_large.length-1) === "/" ? "" : "/";
+
 							path_small += filelist_small;
 							path_large += filelist_large;
 
