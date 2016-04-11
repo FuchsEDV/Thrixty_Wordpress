@@ -67,8 +67,16 @@ If you need some example files, download the "example"-folder from [here](https:
     * Central Settings
 
 ### 6.) Planned Features and Changes
+(ordered)
 * l18n - Translate backend language to english with an OPTION for german.
 * Change the setting fields to textfield, radiobutton, checkbox and dropdown respectively.
+(unordered)
+* Bind scripts, styles and tinymceplugin to areas, that actually (or potentially) use them.
+* Implement capabilities to user roles.
+	* changing settings
+	* box3d to thrixty conversions
+	* editing posts and allowed tinymce
+	* viewing thrixty animations
 
 ### 7.) License
 ```txt
