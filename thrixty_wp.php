@@ -145,8 +145,8 @@
 							"__SITE__" => get_site_url(),
 							"basepath" => $thrixty_options["basepath"],
 							// "object_name" => "",
-							"filelist_path_small" => $thrixty_options["filelist_path_small"] ? : "small/Filelist.txt",
-							"filelist_path_large" => $thrixty_options["filelist_path_large"] ? : "large/Filelist.txt",
+							"filelist_path_small" => $thrixty_options["filelist_path_small"] ? $thrixty_options["filelist_path_small"] : "small/Filelist.txt",
+							"filelist_path_large" => $thrixty_options["filelist_path_large"] ? $thrixty_options["filelist_path_large"] : "large/Filelist.txt",
 							// "zoom_control" => $thrixty_options["zoom_control"],
 							// "zoom_mode" => $thrixty_options["zoom_mode"],
 							// "zoom_pointer" => $thrixty_options["zoom_pointer"],
@@ -575,7 +575,7 @@
 		function thrixty_convert_box3d_shortcodes($post_ids_string){
 			global $wpdb;
 
-			$post_ids = [];
+			$post_ids = array();
 
 			if( $post_ids_string == "all" ){
 				// select post ids
