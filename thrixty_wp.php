@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player 2.0.1
+	 * Plugin Name: Thrixty Player 2.0.1b
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 2.0.1
+	 * Version: 2.0.1b
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 2.0.1
+	 * @version 2.0.1b
 	 */
 
 
@@ -573,46 +573,53 @@
 		 * @return /
 		 */
 		function thrixty_convert_box3d_shortcodes($post_ids_string){
-			// this array will be filled with posts to be updated by this function
-			$post_arr = array();
+			global $wpdb;
 
-			// build argument array for WP_Query
-			//  - always look for posts with a box3d shortcode
-			$wp_query_args = array("s" => "[box3d");
-			//  - when given specific numbers instead of the keyword "all", filter them
-			if( $post_ids_string != "all" ){
-				$wp_query_args["post__in"] = array();
+			$post_ids = [];
+
+			if( $post_ids_string == "all" ){
+				// select post ids
+				$query = "SELECT id
+					FROM wp_posts
+					WHERE post_content LIKE '%[box3d%';";
+				$results = $wpdb->get_results($query, OBJECT_K);
+
+				foreach( $results as $i => $v ){
+					$post_ids []= $i;
+				} unset( $i, $v );
+
+			} else {
+				// parse the string as a list of post ids
 				$tmp_arr = explode(",", $post_ids_string);
-
-				foreach( $tmp_arr as $id ){
+				foreach( $tmp_arr as $i => $v ){
 					// remove everything, that is not a digit
-					$id = preg_replace( "/[^0-9]/", "", $id );
+					$v = preg_replace( "/[^0-9]/", "", $v );
 					// add to query, if there is a number left
-					if( $id != "" ){
-						$wp_query_args["post__in"] []= $id;
+					if( $v != "" ){
+						$post_ids []= (integer) $v;
 					}
-				} unset($tmp_arr, $id);
+				} unset( $i, $v );
+
+				unset( $tmp_arr );
 			}
+
+			// next select all posts with these ids
+			$query = "SELECT id, post_content FROM ".$wpdb->prefix."posts WHERE id IN (".implode(", ", $post_ids).")";
+			$posts = $wpdb->get_results($query, OBJECT_K);
 
 			// The typical Shortcode RegEx which gets returned by "get_shortcode_regex()".
 			//   The function delivers it with all registered Shortcodes though,
 			//   so this is aiming for box3d shortcodes only.
 			$shortcode_regex = '/\[(\[?)(box3d)(?![\w-])([^\]\/]*(?:\/(?!\])[^\]\/]*)*?)(?:(\/)\]|\](?:([^\[]*+(?:\[(?!\/\2\])[^\[]*+)*+)\[\/\2\])?)(\]?)/s';
 
-
-			// execute the WP_Query and give back all found posts
-			$the_query = new WP_Query( $wp_query_args );
-			$posts = $the_query->posts;
-
-			// loop through all those found posts
-			foreach( $posts as $post ){
+			foreach( $posts as $cur_post ){
 
 				// get single post text
-				$post_content = $post->post_content;
+				$cur_post_content = $cur_post->post_content;
 
 				// use the regex to search for Shortcodes
 				$hits = array();
-				preg_match_all($shortcode_regex, $post_content, $hits, PREG_OFFSET_CAPTURE); // found things will get stored in $hits
+				preg_match_all($shortcode_regex, $cur_post_content, $hits, PREG_OFFSET_CAPTURE); // found things will get stored in $hits
 
 				// replace the last shortcodes first!!!
 				$hits = array_reverse($hits[0]);
@@ -624,43 +631,41 @@
 					$old_shortcode = substr_replace( $hit[0], " ", -1, 0 );
 
 					$position = $hit[1];
+
 					// parse shortcode attributes to array
 					$old_sc_atts = shortcode_parse_atts($old_shortcode);
 
 					//// generate thrixty shortcode
-					$new_shortcode = "[thrixty ";
+					$new_shortcode = "[thrixty";
 					/// basepath
 						// check for old shortcode attribute path
 						if( isset($old_sc_atts["path"]) && $old_sc_atts["path"] != "" ){
 							// if it was set, set basepath to that old value
-							$new_shortcode .= "basepath='".$old_sc_atts["path"]."' ";
+							$new_shortcode .= " basepath='".$old_sc_atts["path"]."'";
 						// if not, check for different old and new basepath options
 						} else if( isset($box3d_options["path"]) && isset($thrixty_options["basepath"]) && $box3d_options["path"] != $thrixty_options["basepath"] ){
 							// if they are indeed different, the new shortcode with the old path and object can only work with a basepath attribute
-							$new_shortcode .= "basepath='".$box3d_options["path"]."' ";
+							$new_shortcode .= " basepath='".$box3d_options["path"]."'";
 						}
 					/// filelist small and large paths
 						if( isset($old_sc_atts["object"]) && $old_sc_atts["object"] != "" ){
-							$new_shortcode .= "object_name='".$old_sc_atts["object"]."' ";
+							$new_shortcode .= " object_name='".$old_sc_atts["object"]."'";
 						}
 					/// direction
 						if( isset($old_sc_atts["direction"]) && $old_sc_atts["direction"] != "" ){
-							$new_shortcode .= "reversion='".$old_sc_atts["direction"]."' ";
+							$new_shortcode .= " reversion='".$old_sc_atts["direction"]."'";
 						}
 					$new_shortcode .= "]";
 
 					// write new shortcode in place of the old
-					$post_content = substr_replace($post_content, $new_shortcode, $position, strlen($old_shortcode)-1 );
+					$cur_post_content = substr_replace($cur_post_content, $new_shortcode, $position, strlen($old_shortcode)-1 );
 				}
 
-				// assign new content to post
-				// echo "<pre>";
-				// 	var_dump($post_content);
-				// echo "</pre>";
-				$post->post_content = $post_content;
-				wp_update_post($post);
+				$query = "UPDATE ".$wpdb->prefix."posts SET post_content = '".addslashes($cur_post_content)."' WHERE id = ".$cur_post->id.";";
+				$wpdb->query( $query );
 
-			}
+			} unset( $cur_post );
+
 		}
 
 	// /thrixty settings page

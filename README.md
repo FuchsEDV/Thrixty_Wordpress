@@ -52,6 +52,10 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
+* V2.0.1b:
+	* Rewrote Shortcode Conversion
+* V2.0.1:
+	* Update to Thrixty Version 2.0.1 (Hotfix)
 * V2.0.0:
 	* Update to Thrixty Version 2.0.0
 * V1.6.1:
