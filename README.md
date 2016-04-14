@@ -52,6 +52,13 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
+* V2.1:
+	(planned)
+	* Fill the backend error section with values.
+	(done)
+	* Fixed settings descriptions
+	* Update field types.
+	* Update to Thrixty V2.1
 * V2.0.1b:
 	* Rewrote Shortcode Conversion
 * V2.0.1:
@@ -81,6 +88,8 @@ If you need some example files, download the "example"-folder from [here](https:
 	* box3d to thrixty conversions
 	* editing posts and allowed tinymce
 	* viewing thrixty animations
+* Include a test player instance which gets updated, when changing settings. (This needs Thrixty to be controllable after instantiating without page reload - or at least being able to reinstantiate.)
+* Include js-alert before converting Shortcodes.
 
 ### 7.) License
 ```txt

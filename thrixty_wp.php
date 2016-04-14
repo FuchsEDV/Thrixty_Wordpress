@@ -1,18 +1,18 @@
 <?php
 	/**
-	 * Plugin Name: Thrixty Player 2.0.1b
+	 * Plugin Name: Thrixty Player 2.1
 	 * Plugin URI:
 	 * Description: Wordpress Plugin, that is building a Player for 360° photography.
 	 *   It uses Shortcodes to generate HTML-Code, ready to be used as the Players base.
 	 *   The versionnumber of this plugin reflects the version of the used ThrixtyPlayer.
 	 * Author: F.Heitmann @ Fuchs EDV
 	 * Author URI:
-	 * Version: 2.0.1b
+	 * Version: 2.1
 	 *
 	 * @package Wordpress
 	 * @subpackage Thrixty Player
 	 * @since 4.1.0
-	 * @version 2.0.1b
+	 * @version 2.1
 	 */
 
 
@@ -375,10 +375,20 @@
 				<form action="options.php" method="post">
 					<?php settings_fields('thrixty_options'); ?>
 					<style>
+						#thrixty_settings_table th,
 						#thrixty_settings_table td{
 							vertical-align: top;
+							padding: 5px 3px;
 							border: 1px solid lightgray;
 							border-collapse: collapse;
+							margin: 0;
+						}
+						#thrixty_settings_table td input,
+						#thrixty_settings_table td select{
+							width: 100%;
+							line-height: 1.5em;
+							border: 1px solid #cccccc;
+							margin: 0;
 						}
 					</style>
 					<table id="thrixty_settings_table">
@@ -392,17 +402,25 @@
 							<td>
 								<input id='plugin_basepath' name='thrixty_options[basepath]' size='40' type='text' placeholder='[!MANDATORY!]' value='<?php echo $thrixty_options['basepath']; ?>' />
 							</td>
-							<td rowspan="3">
+							<td rowspan="4">
 								Dies ist der Grundpfad, von dem aus nach den beiden Filelists gesucht wird.<br>
-								Beispiel: <b>http://example.com/360_pictures/</b>[filelist-paths]<br>
+								Format: <b>[Basepath/][object]/[filelist-path]</b><br>
+								Beispiel: <b>http://example.com/360_pictures/ cake / small/Filelist.txt</b><br>
 								F&uuml;r diese Option gibt es Shortcuts, die einen Teil des Pfades herleiten:<br>
 								<b>"__SITE__"</b>: Verweist auf die URL der Startseite.<br>
 								<b>"__PLUGIN__"</b>: Verweist auf Hauptordner dieses Plugins, wie er auch f&uuml;r die Ressourcen benutzt wird.<br>
 								<b>"__UPLOAD__"</b>: Verweist auf den Uploadordner, der in Wordpress verwendet wird.<br>
 								<?php if( isset($box3d_options["path"]) ){ ?>
-									Der alte Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
+									Der alte Basepath Wert aus Box3D: <b><?php echo $box3d_options["path"]; ?></b><br>
 								<? } ?>
 							</td>
+						</tr>
+						<tr>
+							<td>Object</td>
+							<td>
+								<input size='40' type='text' placeholder='[immer Shortcode-spezifisch]' value='[immer Shortcode-spezifisch]' disabled />
+							</td>
+							<!--<td>object_name</td>-->
 						</tr>
 						<tr>
 							<td>Filelist Path Small</td>
@@ -421,58 +439,83 @@
 						<tr>
 							<td>Zoom Control</td>
 							<td>
-								<input id='plugin_zoom_control' name='thrixty_options[zoom_control]' size='40' type='text' placeholder='[Thrixty Standard] progressive' value='<?php echo $thrixty_options['zoom_control']; ?>' />
+								<?php $zc = $thrixty_options['zoom_control']; ?>
+								<select id='plugin_zoom_control' name='thrixty_options[zoom_control]'>
+									<option <?php if( $zc == ""            ){ echo "selected "; } ?>value=""           >[Thrixty Standard] progressive</option>
+									<option <?php if( $zc == "progressive" ){ echo "selected "; } ?>value="progressive">Progressive</option>
+									<option <?php if( $zc == "classic"     ){ echo "selected "; } ?>value="classic"    >Classic</option>
+								</select>
 							</td>
 							<td>
 								Hier wird eingestellt, wie der Kunde sich in dem vergr&ouml;&szlig;erten Bild bewegen kann.<br>
 								Im Progressiven Modus wird die Mausposition genutzt, um den Bildausschnitt laufend zu verschieben.<br>
-								Im Klassischen Modus wird der Positions Anzeiger benutzt, um den Bildausschnitt zu verschieben.<br>
-								M&ouml;gliche Werte:<br>
-								<b>progressive</b>, classic<br>
+								Im Klassischen Modus wird der Zoom Pointer benutzt, um den Bildausschnitt zu verschieben.<br>
+								M&ouml;gliche Werte: <i><b>progressive</b>, classic</i>
 							</td>
 						</tr>
 						<tr>
 							<td>Zoom Mode</td>
 							<td>
-								<input id='plugin_zoom_mode' name='thrixty_options[zoom_mode]' size='40' type='text' placeholder='[Thrixty Standard] inbox' value='<?php echo $thrixty_options['zoom_mode']; ?>' />
+								<?php $zm = $thrixty_options['zoom_mode']; ?>
+								<select id='plugin_zoom_mode' name='thrixty_options[zoom_mode]'>
+									<option <?php if( $zm == ""       ){ echo "selected "; } ?>value=""      >[Thrixty Standard] inbox</option>
+									<option <?php if( $zm == "inbox"  ){ echo "selected "; } ?>value="inbox" >Inbox</option>
+									<option <?php if( $zm == "outbox" ){ echo "selected "; } ?>value="outbox">Outbox</option>
+									<option <?php if( $zm == "none"   ){ echo "selected "; } ?>value="none"  >None</option>
+								</select>
 							</td>
 							<td>
 								Hier kann die Zoom Art gew&auml;hlt werden.<br>
 								Der Inbox-Zoom zoomt das Bild direkt gr&ouml;&szlig;er.<br>
 								Der Outbox-Zoom erzeugt dagegen ein extra Fenster.<br>
 								(Im Fullscreen wird aus dem Outbox vorr&uuml;bergehend in den normalen Inbox-Zoom gewechselt!)<br>
-								M&ouml;gliche Werte:<br>
-								<b>inbox</b>, outbox<br>
+								M&ouml;gliche Werte: <i><b>inbox</b>, outbox, none</i>
 							</td>
 						</tr>
 						<tr>
 							<td>Zoom Pointer</td>
 							<td>
-								<input id='plugin_zoom_pointer' name='thrixty_options[zoom_pointer]' size='40' type='text' placeholder='[Thrixty Standard] minimap' value='<?php echo $thrixty_options['zoom_pointer']; ?>' />
+								<?php $zp = $thrixty_options['zoom_pointer']; ?>
+								<select id='plugin_zoom_pointer' name='thrixty_options[zoom_pointer]'>
+									<option <?php if( $zp == ""        ){ echo "selected "; } ?>value=""       >[Thrixty Standard] minimap</option>
+									<option <?php if( $zp == "minimap" ){ echo "selected "; } ?>value="minimap">minimap</option>
+									<option <?php if( $zp == "marker"  ){ echo "selected "; } ?>value="marker" >marker</option>
+									<option <?php if( $zp == "none"    ){ echo "selected "; } ?>value="none"   >none</option>
+								</select>
 							</td>
 							<td>
 								Damit man sich in dem vergr&ouml;&szlig;erten Bild zurechtfindet, kann man dazu einen Markierer anzeigen.<br>
 								Die Minimap ist ein stark verkleinertes Bild und beschreibt daran den momentanen Ausschnitt.<br>
 								Der Marker ist ein Rechteck innerhalb des Bildes, das den momentanen Ausschnitt markiert.<br>
-								M&ouml;gliche Werte:<br>
-								<b>minimap</b>, marker, none<br>
+								M&ouml;gliche Werte: <i><b>minimap</b>, marker, none</i>
 							</td>
 						</tr>
 						<tr>
 							<td>Outbox Position</td>
 							<td>
-								<input id='plugin_outbox_position' name='thrixty_options[outbox_position]' size='40' type='text' placeholder='[Thrixty Standard] right' value='<?php echo $thrixty_options['outbox_position']; ?>' />
+								<?php $op = $thrixty_options['outbox_position']; ?>
+								<select id='plugin_outbox_position' name='thrixty_options[outbox_position]'>
+									<option <?php if( $op == ""       ){ echo "selected "; } ?>value=""      >[Thrixty Standard] right</option>
+									<option <?php if( $op == "right"  ){ echo "selected "; } ?>value="right" >right</option>
+									<option <?php if( $op == "bottom" ){ echo "selected "; } ?>value="bottom">bottom</option>
+									<option <?php if( $op == "left"   ){ echo "selected "; } ?>value="left"  >left</option>
+									<option <?php if( $op == "top"    ){ echo "selected "; } ?>value="top"   >top</option>
+								</select>
 							</td>
 							<td>
 								Wenn der Outbox Zoom verwendet wird, kann hier gew&auml;hlt werden, wo das Fenster auftauchen soll.<br>
-								M&ouml;gliche Werte:<br>
-								<b>right</b>, bottom, left, top<br>
+								M&ouml;gliche Werte: <i><b>right</b>, bottom, left, top</i>
 							</td>
 						</tr>
 						<tr>
 							<td>Reversion</td>
 							<td>
-								<input id='plugin_reversion' name='thrixty_options[reversion]' size='40' type='text' placeholder='[Thrixty Standard] forward' value='<?php echo $thrixty_options['reversion']; ?>' />
+								<?php $rev = $thrixty_options['reversion']; ?>
+								<select id='plugin_reversion' name='thrixty_options[reversion]'>
+									<option <?php if( $rev == ""      ){ echo "selected "; } ?>value=""     >[Thrixty Standard] false</option>
+									<option <?php if( $rev == "false" ){ echo "selected "; } ?>value="false">false</option>
+									<option <?php if( $rev == "true"  ){ echo "selected "; } ?>value="true" >true</option>
+								</select>
 							</td>
 							<td>
 								Diese Option ermöglicht Ihnen, die Animation an die Maus/Berührungs-Steuerung anzupassen.<br>
@@ -514,20 +557,23 @@
 							</td>
 							<td>
 								Dies gibt an, ob Player Instanzen ihre Animation automatisch abspielen sollen.<br>
-								M&ouml;gliche Werte:<br>
-								<b>first</b>, all_on, all_off<br>
+								M&ouml;gliche Werte: <i><b>-1, on (infinite)</b>, [integer] (finite), 0 / off</i>
 							</td>
 						</tr>
 						<tr>
 							<td>Autoload</td>
 							<td>
-								<input id='plugin_autoload' name='thrixty_options[autoload]' size='40' type='text' placeholder='[Thrixty Standard] on' value='<?php echo $thrixty_options['autoload']; ?>' />
+								<?php $al = $thrixty_options['autoload']; ?>
+								<select id='plugin_autoload' name='thrixty_options[autoload]'>
+									<option <?php if( $al == ""    ){ echo "selected "; } ?>value=""   >[Thrixty Standard] on</option>
+									<option <?php if( $al == "on"  ){ echo "selected "; } ?>value="on" >On</option>
+									<option <?php if( $al == "off" ){ echo "selected "; } ?>value="off">Off</option>
+								</select>
 							</td>
 							<td>
 								Diese Option gibt an, ob die Player automatisch ihre Bilder laden sollen.<br>
-								Auf Mobil-geräten wird diese Option vom Thrixty ignoriert und niemals Bilder automatisch geladen.</b>
-								M&ouml;gliche Werte:<br>
-								<b>on</b>, off<br>
+								Auf Mobil-geräten wird diese Option vom Thrixty ignoriert und niemals Bilder automatisch geladen.<br>
+								M&ouml;gliche Werte: <i><b>on</b>, off</i>
 							</td>
 						</tr>
 					</table>
@@ -535,11 +581,6 @@
 					<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 				</form>
 				<br>
-				<hr>
-				<h3>Error Sektion</h3>
-				<p>
-					&gt;&gt;&gt; Beschreibungen hier &lt;&lt;&lt;
-				</p>
 				<hr>
 				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
 				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
