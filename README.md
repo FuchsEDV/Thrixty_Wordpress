@@ -55,8 +55,9 @@ If you need some example files, download the "example"-folder from [here](https:
 * V2.1:
 	(planned)
 	* Fill the backend error section with values.
+	(done)
+	* Fixed settings descriptions
 	* Update field types.
-	* Fix errors in Settings descriptions
 	* Update to Thrixty V2.1
 * V2.0.1b:
 	* Rewrote Shortcode Conversion
