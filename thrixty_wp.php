@@ -375,10 +375,20 @@
 				<form action="options.php" method="post">
 					<?php settings_fields('thrixty_options'); ?>
 					<style>
+						#thrixty_settings_table th,
 						#thrixty_settings_table td{
 							vertical-align: top;
+							padding: 5px 3px;
 							border: 1px solid lightgray;
 							border-collapse: collapse;
+							margin: 0;
+						}
+						#thrixty_settings_table td input,
+						#thrixty_settings_table td select{
+							width: 100%;
+							line-height: 1.5em;
+							border: 1px solid #cccccc;
+							margin: 0;
 						}
 					</style>
 					<table id="thrixty_settings_table">
@@ -555,9 +565,9 @@
 							<td>
 								<?php $al = $thrixty_options['autoload']; ?>
 								<select id='plugin_autoload' name='thrixty_options[autoload]'>
-									<option <?php if( $rev == ""    ){ echo "selected "; } ?>value=""   >[Thrixty Standard] on</option>
-									<option <?php if( $rev == "on"  ){ echo "selected "; } ?>value="on" >On</option>
-									<option <?php if( $rev == "off" ){ echo "selected "; } ?>value="off">Off</option>
+									<option <?php if( $al == ""    ){ echo "selected "; } ?>value=""   >[Thrixty Standard] on</option>
+									<option <?php if( $al == "on"  ){ echo "selected "; } ?>value="on" >On</option>
+									<option <?php if( $al == "off" ){ echo "selected "; } ?>value="off">Off</option>
 								</select>
 							</td>
 							<td>
@@ -571,11 +581,6 @@
 					<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 				</form>
 				<br>
-				<hr>
-				<h3>Error Sektion</h3>
-				<p>
-					&gt;&gt;&gt; Beschreibungen hier &lt;&lt;&lt;
-				</p>
 				<hr>
 				<h3 id="converter">Box3D zu Thrixty konvertieren</h3>
 				<form name="test" action="options-general.php?page=thrixty_options_page" method="post">
