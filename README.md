@@ -52,30 +52,31 @@ If you need some example files, download the "example"-folder from [here](https:
 ```
 
 ### 5.) Change Log
-* V2.1:
-	(planned)
-	* Fill the backend error section with values.
-	(done)
-	* Fixed settings descriptions
-	* Update field types.
-	* Update to Thrixty V2.1
-* V2.0.1b:
-	* Rewrote Shortcode Conversion
-* V2.0.1:
-	* Update to Thrixty Version 2.0.1 (Hotfix)
-* V2.0.0:
-	* Update to Thrixty Version 2.0.0
-* V1.6.1:
-	* TinyMCE-Extension extended
-	* Update to Thrixty Version 1.6.1
-* V1.6:
-	* Update to Thrixty Version 1.6
-* V1.5.1:
-	* Support of newest Thrixty Version 1.5.1
-* V1.0 (Release):
-    * Automatic embedding of base files
-    * Shortcode Generator
-    * Central Settings
+* V2:
+	* V2.2.1:
+		* Update to Thrixty V2.2.1
+	* V2.1:
+		* Fixed settings descriptions
+		* Update field types.
+		* Update to Thrixty V2.1
+	* V2.0.1b:
+		* Rewrote Shortcode Conversion
+	* V2.0.1:
+		* Update to Thrixty Version 2.0.1 (Hotfix)
+	* V2.0.0:
+		* Update to Thrixty Version 2.0.0
+* V1:
+	* V1.6.1:
+		* TinyMCE-Extension extended
+		* Update to Thrixty Version 1.6.1
+	* V1.6:
+		* Update to Thrixty Version 1.6
+	* V1.5.1:
+		* Support of newest Thrixty Version 1.5.1
+	* V1.0 (Release):
+		* Automatic embedding of base files
+		* Shortcode Generator
+		* Central Settings
 
 ### 6.) Planned Features and Changes
 (ordered)
