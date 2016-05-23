@@ -53,8 +53,8 @@ If you need some example files, download the "example"-folder from [here](https:
 
 ### 5.) Change Log
 * V2:
-	*V2.2:
-		* Update to Thrixty V2.2
+	* V2.2.1:
+		* Update to Thrixty V2.2.1
 	* V2.1:
 		* Fixed settings descriptions
 		* Update field types.
