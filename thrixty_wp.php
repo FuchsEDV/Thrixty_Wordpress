@@ -186,12 +186,11 @@
 	add_shortcode("thrixty", "thrixty_shortcode_handler");
 	function thrixty_shortcode_handler($atts){
 		global $player_counter; // This global is counting the number of initialized Players.
-
 		$atts = $atts;
 		$thrixty_options = get_option("thrixty_options");
 		$div_attrs = array();
 		/* basepath */
-			if( !!$atts["basepath"] ){
+			if( isset($atts["basepath"]) ){
 				$basepath = $atts["basepath"];
 			} else if( !!$thrixty_options["basepath"] ){
 				$basepath = $thrixty_options["basepath"];
@@ -207,67 +206,67 @@
 			$basepath = trailingslashit(trailingslashit($basepath).$atts["object_name"]);
 			$div_attrs["basepath"] = $basepath;
 		/* filelist_path_small */
-			if( !!$atts["filelist_path_small"] ){
+			if( isset($atts["filelist_path_small"]) ){
 				$div_attrs["filelist_path_small"] = $atts["filelist_path_small"];
 			} else if( !!$thrixty_options["filelist_path_small"] ){
 				$div_attrs["filelist_path_small"] = $thrixty_options["filelist_path_small"];
 			}
 		/* filelist_path_large */
-			if( !!$atts["filelist_path_large"] ){
+			if( isset($atts["filelist_path_large"]) ){
 				$div_attrs["filelist_path_large"] = $atts["filelist_path_large"];
 			} else if( !!$thrixty_options["filelist_path_large"] ){
 				$div_attrs["filelist_path_large"] = $thrixty_options["filelist_path_large"];
 			}
 		/* zoom_control */
-			if( !!$atts["zoom_control"] ){
+			if( isset($atts["zoom_control"]) ){
 				$div_attrs["zoom_control"] = $atts["zoom_control"];
 			} else if( !!$thrixty_options["zoom_control"] ){
 				$div_attrs["zoom_control"] = $thrixty_options["zoom_control"];
 			}
 		/* zoom_mode */
-			if( !!$atts["zoom_mode"] ){
+			if( isset($atts["zoom_mode"]) ){
 				$div_attrs["zoom_mode"] = $atts["zoom_mode"];
 			} else if( !!$thrixty_options["zoom_mode"] ){
 				$div_attrs["zoom_mode"] = $thrixty_options["zoom_mode"];
 			}
 		/* zoom_pointer */
-			if( !!$atts["zoom_pointer"] ){
+			if( isset($atts["zoom_pointer"]) ){
 				$div_attrs["zoom_pointer"] = $atts["zoom_pointer"];
 			} else if( !!$thrixty_options["zoom_pointer"] ){
 				$div_attrs["zoom_pointer"] = $thrixty_options["zoom_pointer"];
 			}
 		/* outbox_position */
-			if( !!$atts["outbox_position"] ){
+			if( isset($atts["outbox_position"]) ){
 				$div_attrs["outbox_position"] = $atts["outbox_position"];
 			} else if( !!$thrixty_options["outbox_position"] ){
 				$div_attrs["outbox_position"] = $thrixty_options["outbox_position"];
 			}
 		/* reversion */
-			if( !!$atts["reversion"] ){
+			if( isset($atts["reversion"]) ){
 				$div_attrs["reversion"] = $atts["reversion"];
 			} else if( !!$thrixty_options["reversion"] ){
 				$div_attrs["reversion"] = $thrixty_options["reversion"];
 			}
 		/* cycle_duration */
-			if( !!$atts["cycle_duration"] ){
+			if( isset($atts["cycle_duration"]) ){
 				$div_attrs["cycle_duration"] = $atts["cycle_duration"];
 			} else if( !!$thrixty_options["cycle_duration"] ){
 				$div_attrs["cycle_duration"] = $thrixty_options["cycle_duration"];
 			}
 		/* sensitivity_x */
-			if( !!$atts["sensitivity_x"] ){
+			if( isset($atts["sensitivity_x"]) ){
 				$div_attrs["sensitivity_x"] = $atts["sensitivity_x"];
 			} else if( !!$thrixty_options["sensitivity_x"] ){
 				$div_attrs["sensitivity_x"] = $thrixty_options["sensitivity_x"];
 			}
 		/* autoplay */
-			if( !!$atts["autoplay"] ){
+			if( isset($atts["autoplay"]) ){
 				$div_attrs["autoplay"] = $atts["autoplay"];
 			} else if( !!$thrixty_options["autoplay"] ){
 				$div_attrs["autoplay"] = $thrixty_options["autoplay"];
 			}
 		/* autoload */
-			if( !!$atts["autoload"] ){
+			if( isset($atts["autoload"]) ){
 				$div_attrs["autoload"] = $atts["autoload"];
 			} else if( !!$thrixty_options["autoload"] ){
 				$div_attrs["autoload"] = $thrixty_options["autoload"];
